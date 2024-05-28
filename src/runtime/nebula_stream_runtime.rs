@@ -2,10 +2,13 @@ use std::collections::HashMap;
 
 // use self::health::HealthCheckRequest;
 
+use prost::Message;
+
 use crate::query::{Query, QueryId};
+use crate::serialization::protobuf::serialize_query::serialize;
 use crate::{
     // runtime::nebula_stream_runtime::health::health_client::HealthClient,
-    serialization::{cpp::serialize_query, protobuf},
+    serialization::{cpp, protobuf},
 };
 
 // mod health {
@@ -52,21 +55,41 @@ impl NebulaStreamRuntime {
         unimplemented!();
     }
 
-    pub async fn execute_query_grpc(
-        &self,
-        query: Query,
-        placement: String,
-    ) -> Result<QueryId, reqwest::Error> {
-        todo!()
-    }
-
-    // FIXME: This should support grpc, so we need a RequestHandler Interface
     pub async fn execute_query(
         &self,
         query: Query,
         placement: String,
+    ) -> Result<(), Box<reqwest::Error>> {
+        let query_plan = protobuf::serialize_query::serialize(query);
+        let placement = prost_types::Any {
+            type_url: "type.googleapis.com/google.protobuf.StringValue".to_string(),
+            value: placement.bytes().collect::<Vec<u8>>(),
+        };
+        let mut context = HashMap::new();
+        context.insert("placement".to_string(), placement);
+        let request = protobuf::nes::SubmitQueryRequest {
+            query_plan: Some(query_plan),
+            context,
+            query_string: None,
+        };
+        let client = reqwest::Client::builder().build().unwrap();
+        let response = client
+            .post(self.coordinator_url("/v1/nes/query/execute-query-ex"))
+            .body(request.encode_to_vec())
+            .send()
+            .await?;
+
+        dbg!(response);
+        Ok(())
+    }
+
+    // FIXME: This should support grpc, so we need a RequestHandler Interface
+    pub async fn execute_query_rest(
+        &self,
+        query: Query,
+        placement: String,
     ) -> Result<QueryId, reqwest::Error> {
-        let serialized_query = serialize_query::serialize(query);
+        let serialized_query = cpp::serialize_query::serialize(query);
 
         let mut payload = HashMap::new();
         payload.insert("placement", placement);

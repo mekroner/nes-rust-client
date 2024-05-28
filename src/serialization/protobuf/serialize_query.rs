@@ -1,41 +1,10 @@
-use crate::{
-    query::Query,
-    serialization::protobuf::nes::{SerializableQueryPlan, SubmitQueryRequest},
-};
-use prost::Message;
+use crate::{query::Query, serialization::protobuf::nes::SerializableQueryPlan};
 use std::collections::HashMap;
 
 use super::{
     serialize_operator::{serialize_operator_details, SerializableOperatorBuilder},
     serialize_sink::serialize_sink_details,
 };
-
-pub async fn execute_query(
-    query: Query,
-    placement: String,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let query_plan = serialize(query);
-    let placement = prost_types::Any {
-        type_url: "type.googleapis.com/google.protobuf.StringValue".to_string(),
-        value: placement.bytes().collect::<Vec<u8>>(),
-    };
-    let mut context = HashMap::new();
-    context.insert("placement".to_string(), placement);
-    let request = SubmitQueryRequest {
-        query_plan: Some(query_plan),
-        context,
-        query_string: None,
-    };
-    let client = reqwest::Client::builder().build().unwrap();
-    let response = client
-        .post("http://127.0.0.1:8081/v1/nes/query/execute-query-ex")
-        .body(request.encode_to_vec())
-        .send()
-        .await?;
-
-    dbg!(response);
-    Ok(())
-}
 
 pub fn serialize(query: Query) -> SerializableQueryPlan {
     let mut operator_map = HashMap::new();
