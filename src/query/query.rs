@@ -1,4 +1,7 @@
-use crate::operator::{LogicalExpression, Operator, Sink, WindowDescriptor};
+use super::{
+    operator::{LogicalExpression, Operator, OperatorIterator, WindowDescriptor},
+    sink::Sink,
+};
 
 #[derive(Debug)]
 pub struct QueryId(i32);
@@ -20,16 +23,17 @@ impl Query {
         &self.operator
     }
 
+    pub fn operators(&self) -> OperatorIterator {
+        self.operator.iter()
+    }
+
     pub fn sink(&self) -> &Sink {
         &self.sink
     }
 }
 impl QueryBuilder {
     pub fn from_source(source_name: String) -> Self {
-        let operator = Operator::LogicalSource {
-            source_name,
-            child: None,
-        };
+        let operator = Operator::LogicalSource { source_name };
         QueryBuilder { operator }
     }
 
@@ -74,25 +78,5 @@ impl QueryBuilder {
 
     pub fn join_with(self) -> Self {
         unimplemented!();
-    }
-}
-
-#[cfg(test)]
-mod query_tests {
-    use crate::{
-        operator::{LogicalExpression, Sink},
-        runtime::query::QueryBuilder,
-    };
-
-    #[test]
-    fn query_test0() {
-        use LogicalExpression as E;
-        let query = QueryBuilder::from_source("default".to_string())
-            .filter(E::Equal(
-                Box::new(E::Attribute("value".to_string())),
-                Box::new(E::Literal(0)),
-            ))
-            .sink(Sink::NullOutput);
-        dbg!(query.operator);
     }
 }

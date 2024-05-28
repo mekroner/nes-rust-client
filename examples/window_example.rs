@@ -1,6 +1,9 @@
-extern crate nebulastream_rust_client as nes_rs;
+use nes_rs::{
+    query::{sink::Sink, QueryBuilder},
+    NebulaStreamRuntime,
+};
 
-use nes_rs::{runtime::query::QueryBuilder, *};
+extern crate nebulastream_rust_client as nes_rs;
 
 #[tokio::main]
 async fn main() {
@@ -10,8 +13,7 @@ async fn main() {
         Ok(sources) => println!("{:?}", sources),
         Err(err) => println!("{}", err),
     }
-    // let query = runtime.from_source("default_logical");
-    let query = QueryBuilder::from_source("wind_turbines".to_string()).sink(operator::Sink::Print);
+    let query = QueryBuilder::from_source("wind_turbines".to_string()).sink(Sink::Print);
     let result = runtime.execute_query(query, "BottomUp".to_string()).await;
     dbg!(result);
     //TODO

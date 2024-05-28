@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
-use self::health::HealthCheckRequest;
+// use self::health::HealthCheckRequest;
 
-use super::query::{Query, QueryId};
+use crate::query::{Query, QueryId};
 use crate::{
-    runtime::nebula_stream_runtime::health::health_client::HealthClient,
-    serialization::cpp::serialize_query,
+    // runtime::nebula_stream_runtime::health::health_client::HealthClient,
+    serialization::{cpp::serialize_query, protobuf},
 };
 
-mod health {
-    tonic::include_proto!("grpc.health.v1");
-}
+// mod health {
+//     tonic::include_proto!("grpc.health.v1");
+// }
 
 pub struct NebulaStreamConfig {
     host: String,
@@ -30,15 +30,15 @@ impl NebulaStreamRuntime {
         Self { config }
     }
 
-    pub async fn check_health(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let mut client = HealthClient::connect("http://127.0.0.1:4000").await?;
-        let request = HealthCheckRequest {
-            service: "NES_DEFAULT_HEALTH_CHECK_SERVICE".to_string(),
-        };
-        let response = client.check(request).await?;
-        println!("{:?}", response.into_inner());
-        Ok(())
-    }
+    // pub async fn check_health(&self) -> Result<(), Box<dyn std::error::Error>> {
+    //     let mut client = HealthClient::connect("http://127.0.0.1:4000").await?;
+    //     let request = HealthCheckRequest {
+    //         service: "NES_DEFAULT_HEALTH_CHECK_SERVICE".to_string(),
+    //     };
+    //     let response = client.check(request).await?;
+    //     println!("{:?}", response.into_inner());
+    //     Ok(())
+    // }
 
     pub async fn check_connection(&self) -> Result<bool, reqwest::Error> {
         let response = reqwest::get(self.coordinator_url("/v1/nes/connectivity/check")).await?;
@@ -50,6 +50,14 @@ impl NebulaStreamRuntime {
 
     pub fn from_source(source_name: String) -> Query {
         unimplemented!();
+    }
+
+    pub async fn execute_query_grpc(
+        &self,
+        query: Query,
+        placement: String,
+    ) -> Result<QueryId, reqwest::Error> {
+        todo!()
     }
 
     // FIXME: This should support grpc, so we need a RequestHandler Interface

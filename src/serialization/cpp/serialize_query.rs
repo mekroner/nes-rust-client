@@ -1,8 +1,9 @@
-use crate::{
+use crate::query::{
     operator::{
-        Duration, LogicalExpression, Operator, Sink, TimeCharacteristic, TimeUnit, WindowDescriptor,
+        Duration, LogicalExpression, Operator, TimeCharacteristic, TimeUnit, WindowDescriptor,
     },
-    runtime::query::Query,
+    sink::Sink,
+    Query,
 };
 
 pub fn serialize(query: Query) -> String {
@@ -16,7 +17,7 @@ pub fn serialize(query: Query) -> String {
 fn serialize_operator(operator: Option<&Operator>) -> String {
     use Operator as O;
     match operator {
-        Some(O::LogicalSource { source_name, child }) => {
+        Some(O::LogicalSource { source_name }) => {
             format!("from(\"{}\")", source_name,)
         }
         Some(O::Window { descriptor, child }) => format!(
@@ -97,10 +98,13 @@ fn serialize_sink(sink: &Sink) -> String {
 #[cfg(test)]
 mod serialize_query_test {
     use crate::{
-        operator::{
-            Duration, LogicalExpression, Sink, TimeCharacteristic, TimeUnit, WindowDescriptor,
+        query::{
+            operator::{
+                Duration, LogicalExpression, TimeCharacteristic, TimeUnit, WindowDescriptor,
+            },
+            sink::Sink,
+            QueryBuilder,
         },
-        runtime::query::QueryBuilder,
         serialization::cpp::serialize_query::serialize,
     };
 

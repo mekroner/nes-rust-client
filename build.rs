@@ -1,9 +1,13 @@
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tonic_build::compile_protos("./grpc/Health.proto")?;
+extern crate prost_build;
 
-    tonic_build::compile_protos("./grpc/google/protobuf/any.proto")?;
-    tonic_build::compile_protos("./grpc/SerializableExpression.proto")?;
-    tonic_build::compile_protos("./grpc/SerializableOperator.proto")?;
-    tonic_build::compile_protos("./grpc/SerializableQueryPlan.proto")?;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // prost_build::compile_protos("./grpc/Health.proto")?;
+
+    let mut config = prost_build::Config::new();
+    config.enable_type_names();
+    config.compile_protos(&["./grpc/WorkerLocation.proto"], &["grpc/"])?;
+    config.compile_protos(&["grpc/SerializableExpression.proto"], &["grpc/"])?;
+    config.compile_protos(&["./grpc/SerializableOperator.proto"], &["grpc/"])?;
+    config.compile_protos(&["./grpc/SerializableQueryPlan.proto"], &["grpc/"])?;
     Ok(())
 }

@@ -1,5 +1,5 @@
 pub mod runtime;
-pub mod operator;
+pub mod query;
 pub mod serialization;
 
 pub use runtime::nebula_stream_runtime::NebulaStreamRuntime;

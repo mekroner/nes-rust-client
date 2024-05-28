@@ -8,9 +8,5 @@ async fn main(){
     if let Err(err) = response {
         println!("{}", err);
     }
-    // if let Err(err) = runtime.check_health().await {
-    //     println!("{}", err);
-    // }
-
     // println!("Response: {}", response);
 }
