@@ -65,8 +65,6 @@ pub fn serialize(query: Query) -> SerializableQueryPlan {
         .build();
     operator_map.insert(sink_id, serial_sink);
 
-    dbg!(&operator_map);
-
     SerializableQueryPlan {
         operator_map,
         root_operator_ids: vec![sink_id],

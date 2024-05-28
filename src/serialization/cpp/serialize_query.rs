@@ -1,8 +1,9 @@
 use crate::query::{
-    operator::{
-        Duration, LogicalExpression, Operator, TimeCharacteristic, TimeUnit, WindowDescriptor,
-    },
+    expression::LogicalExpression,
+    operator::Operator,
     sink::Sink,
+    time::{Duration, TimeCharacteristic, TimeUnit},
+    window::WindowDescriptor,
     Query,
 };
 
@@ -99,10 +100,10 @@ fn serialize_sink(sink: &Sink) -> String {
 mod serialize_query_test {
     use crate::{
         query::{
-            operator::{
-                Duration, LogicalExpression, TimeCharacteristic, TimeUnit, WindowDescriptor,
-            },
+            expression::LogicalExpression,
             sink::Sink,
+            time::{Duration, TimeCharacteristic, TimeUnit},
+            window::WindowDescriptor,
             QueryBuilder,
         },
         serialization::cpp::serialize_query::serialize,

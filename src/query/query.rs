@@ -1,6 +1,8 @@
 use super::{
-    operator::{LogicalExpression, Operator, OperatorIterator, WindowDescriptor},
+    expression::LogicalExpression,
+    operator::{Operator, OperatorIterator},
     sink::Sink,
+    window::WindowDescriptor,
 };
 
 #[derive(Debug)]
