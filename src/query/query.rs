@@ -1,5 +1,5 @@
 use super::{
-    expression::LogicalExpression,
+    expression::LogicalExpr,
     operator::{Operator, OperatorIterator},
     sink::Sink,
     window::WindowDescriptor,
@@ -48,7 +48,7 @@ impl QueryBuilder {
         }
     }
 
-    pub fn filter(mut self, expression: LogicalExpression) -> Self {
+    pub fn filter(mut self, expression: LogicalExpr) -> Self {
         let child_operator = self.operator;
         self.operator = Operator::Filter {
             child: Some(Box::new(child_operator)),
