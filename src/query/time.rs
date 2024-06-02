@@ -38,8 +38,8 @@ impl TimeUnit {
 
 #[derive(Debug)]
 pub struct Duration {
-    amount: u32,
-    unit: TimeUnit,
+    pub amount: u32,
+    pub unit: TimeUnit,
 }
 
 impl Duration {
@@ -51,35 +51,39 @@ impl Duration {
         self.unit
     }
 
-    pub fn milliseconds(amount: u32) -> Self {
+    pub fn to_milliseconds(&self) -> u32 {
+        self.amount * self.unit.to_scalar()
+    }
+
+    pub fn from_milliseconds(amount: u32) -> Self {
         Self {
             amount,
             unit: TimeUnit::Milliseconds,
         }
     }
 
-    pub fn seconds(amount: u32) -> Self {
+    pub fn from_seconds(amount: u32) -> Self {
         Self {
             amount,
             unit: TimeUnit::Seconds,
         }
     }
 
-    pub fn minutes(amount: u32) -> Self {
+    pub fn from_minutes(amount: u32) -> Self {
         Self {
             amount,
             unit: TimeUnit::Minutes,
         }
     }
 
-    pub fn hours(amount: u32) -> Self {
+    pub fn from_hours(amount: u32) -> Self {
         Self {
             amount,
             unit: TimeUnit::Hours,
         }
     }
 
-    pub fn days(amount: u32) -> Self {
+    pub fn from_days(amount: u32) -> Self {
         Self {
             amount,
             unit: TimeUnit::Days,
