@@ -4,7 +4,7 @@ use nes_rs::{
         time::{Duration, TimeCharacteristic, TimeUnit},
         window::{
             aggregation::{Aggregation, AggregationType},
-            WindowDescriptor,
+            window_descriptor::WindowDescriptor,
         },
         QueryBuilder,
     },
@@ -38,6 +38,11 @@ async fn main() {
             field_name: "features_properties_mag".into(),
             agg_type: AggregationType::Sum,
         }])
+        // .filter(LogicalExpr(Expr::Binary {
+        //     lhs: Box::new(Expr::Field(Field::untyped("metadata_generated"))),
+        //     rhs: Box::new(Expr::Literal(0i64.into())),
+        //     operator: BinaryOp::LessEquals,
+        // }))
         .sink(Sink::Print);
     let result = runtime.execute_query(query, "BottomUp".to_string()).await;
     dbg!(result);

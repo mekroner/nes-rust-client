@@ -1,16 +1,18 @@
 use crate::query::{
-    operator::Operator,
-    window::{aggregation::{Aggregation, AggregationType}, window_descriptor::WindowDescriptor},
+    expression::{expression::Expr, field::Field, LogicalExpr},
+    operator::{Filter, Operator},
+    window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
 use prost_types::Any;
 
-use super::nes::{
-    serializable_operator::{
-        source_details::SerializableLogicalSourceDescriptor,
-        window_details::{self, aggregation},
-        SourceDetails, WindowDetails,
-    },
-    SerializableOperator,
+use super::{
+    nes::{
+        serializable_operator::{
+            source_details::SerializableLogicalSourceDescriptor, FilterDetails, SourceDetails,
+            WindowDetails,
+        },
+        SerializableOperator,
+    }, serialize_expression::serialize_expression, serialize_window::{serialize_aggregations, serialize_window_descriptor, serialize_window_keys}
 };
 
 pub fn serialize_operator_details(operator: &Operator) -> prost_types::Any {
@@ -18,17 +20,24 @@ pub fn serialize_operator_details(operator: &Operator) -> prost_types::Any {
         Operator::LogicalSource { source_name } => {
             Any::from_msg(&logical_source_details(source_name)).unwrap()
         }
-        Operator::Filter { expression, .. } => todo!(),
+        Operator::Filter(Filter { expression, .. }) => {
+            Any::from_msg(&filter_details(expression)).unwrap()
+        }
         Operator::Window {
             descriptor,
             aggregations,
             key_fields,
             ..
-        } => Any::from_msg(&window_details(descriptor, aggregations, key_fields)).unwrap(),
+        } => Any::from_msg(&window_details(
+            descriptor,
+            aggregations,
+            key_fields.as_deref(),
+        ))
+        .unwrap(),
     }
 }
 
-pub fn logical_source_details(source_name: &String) -> SourceDetails {
+fn logical_source_details(source_name: &String) -> SourceDetails {
     let descriptor = SerializableLogicalSourceDescriptor {
         logical_source_name: source_name.to_string(),
         ..Default::default()
@@ -40,44 +49,26 @@ pub fn logical_source_details(source_name: &String) -> SourceDetails {
     }
 }
 
-pub fn window_details(
+fn filter_details(expr: &LogicalExpr) -> FilterDetails {
+    FilterDetails {
+        predicate: Some(serialize_expression(&expr.0)),
+        ..Default::default()
+    }
+}
+
+fn window_details(
     descriptor: &WindowDescriptor,
     aggregations: &[Aggregation],
-    key_field: &[String],
+    key_fields: Option<&[String]>,
 ) -> WindowDetails {
     WindowDetails {
-        window_type: todo!(),
+        window_type: Some(serialize_window_descriptor(descriptor)),
         window_aggregations: serialize_aggregations(aggregations),
-        distr_char: todo!(),
-        keys: todo!(),
-        allowed_lateness: todo!(),
-        origin: todo!(),
+        keys: key_fields.map_or(vec![], |keys| serialize_window_keys(keys)),
+        ..Default::default()
     }
 }
 
-pub fn serialize_aggregations(aggregations: &[Aggregation]) -> Vec<window_details::Aggregation> {
-    aggregations
-        .iter()
-        .map(|agg| window_details::Aggregation {
-            r#type: serialize_aggregation_type(agg.agg_type).into(),
-            on_field: todo!(),
-            as_field: None,
-        })
-        .collect()
-}
-
-pub const fn serialize_aggregation_type(agg_type: AggregationType) -> window_details::aggregation::Type {
-    use window_details::aggregation::Type as T;
-    use AggregationType as AT;
-    match agg_type {
-        AT::Sum => T::Sum,
-        AT::Average => T::Avg,
-        AT::Min => T::Min,
-        AT::Max => T::Max,
-        AT::Median => T::Median,
-        AT::Count => T::Count,
-    }
-}
 
 #[derive(Debug, Default, Clone)]
 pub struct SerializableOperatorBuilder {

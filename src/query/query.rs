@@ -1,6 +1,6 @@
 use super::{
-    expression::LogicalExpression,
-    operator::{Operator, OperatorIterator},
+    expression::LogicalExpr,
+    operator::{Filter, Operator, OperatorIterator},
     sink::Sink,
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
@@ -21,7 +21,7 @@ pub struct WindowedQueryBuilder {
 
 impl WindowedQueryBuilder {
     pub fn by_key(mut self, key: impl Into<String>) -> Self {
-        if let Some(mut key_fields) = self.key_fields {
+        if let Some(ref mut key_fields) = self.key_fields {
             key_fields.push(key.into());
         } else {
             self.key_fields = Some(vec![key.into()]);
@@ -29,9 +29,9 @@ impl WindowedQueryBuilder {
         self
     }
 
-    pub fn apply(mut self, aggregation: impl Iterator<Item=Aggregation>) -> QueryBuilder {
+    pub fn apply(mut self, aggregation: impl IntoIterator<Item = Aggregation>) -> QueryBuilder {
         let child_operator = self.query_builder.operator;
-        let aggregations = aggregation.collect();
+        let aggregations = aggregation.into_iter().collect();
         self.query_builder.operator = Operator::Window {
             child: Some(Box::new(child_operator)),
             descriptor: self.descriptor,
@@ -78,12 +78,12 @@ impl QueryBuilder {
         }
     }
 
-    pub fn filter(mut self, expression: LogicalExpression) -> Self {
+    pub fn filter(mut self, expression: LogicalExpr) -> Self {
         let child_operator = self.operator;
-        self.operator = Operator::Filter {
+        self.operator = Operator::Filter(Filter {
             child: Some(Box::new(child_operator)),
             expression,
-        };
+        });
         self
     }
 
