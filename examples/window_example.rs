@@ -1,5 +1,13 @@
 use nes_rs::{
-    query::{sink::Sink, QueryBuilder},
+    query::{
+        expression::{
+            expression::{BinaryOp, Expr, NESType},
+            field::Field,
+            LogicalExpr,
+        },
+        sink::Sink,
+        QueryBuilder,
+    },
     NebulaStreamRuntime,
 };
 
@@ -13,7 +21,13 @@ async fn main() {
         Ok(sources) => println!("{:?}", sources),
         Err(err) => println!("{}", err),
     }
-    let query = QueryBuilder::from_source("wind_turbines".to_string()).sink(Sink::Print);
+    let query = QueryBuilder::from_source("wind_turbines".to_string())
+        .filter(LogicalExpr(Expr::Binary {
+            lhs: Box::new(Expr::Field(Field::untyped("metadata_generated"))),
+            rhs: Box::new(Expr::Literal(0i64.into())),
+            operator: BinaryOp::LessEquals,
+        }))
+        .sink(Sink::Print);
     let result = runtime.execute_query(query, "BottomUp".to_string()).await;
     dbg!(result);
     //TODO

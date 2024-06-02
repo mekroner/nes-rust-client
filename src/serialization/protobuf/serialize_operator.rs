@@ -1,17 +1,20 @@
-use crate::query::operator::Operator;
+use crate::query::{expression::LogicalExpr, operator::Operator};
 use prost_types::Any;
 
-use super::nes::{
-    serializable_operator::{source_details::SerializableLogicalSourceDescriptor, SourceDetails},
+use super::{nes::{
+    serializable_operator::{
+        source_details::SerializableLogicalSourceDescriptor, FilterDetails, SourceDetails,
+    },
+    statistic_window_descriptor_message::HyperLogLogDetails,
     SerializableOperator,
-};
+}, serialize_expression::serialize_expression};
 
 pub fn serialize_operator_details(operator: &Operator) -> prost_types::Any {
     match operator {
         Operator::LogicalSource { source_name } => {
             Any::from_msg(&logical_source_details(source_name.clone())).unwrap()
         }
-        Operator::Filter { expression, .. } => todo!(),
+        Operator::Filter { expression, .. } => Any::from_msg(&filter_details(expression)).unwrap(),
         Operator::Window { descriptor, .. } => todo!(),
     }
 }
@@ -24,6 +27,13 @@ pub fn logical_source_details(source_name: String) -> SourceDetails {
     let descriptor = Any::from_msg(&descriptor).unwrap();
     SourceDetails {
         source_descriptor: Some(descriptor),
+        ..Default::default()
+    }
+}
+
+pub fn filter_details(expr: &LogicalExpr) -> FilterDetails {
+    FilterDetails {
+        predicate: Some(serialize_expression(&expr.0)),
         ..Default::default()
     }
 }
