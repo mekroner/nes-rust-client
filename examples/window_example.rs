@@ -1,5 +1,10 @@
 use nes_rs::{
     query::{
+        expression::{
+            expression::{BinaryOp, Expr},
+            field::Field,
+            LogicalExpr,
+        },
         sink::Sink,
         time::{Duration, TimeCharacteristic, TimeUnit},
         window::{
@@ -24,7 +29,7 @@ async fn main() {
     let query = QueryBuilder::from_source("wind_turbines".to_string())
         .window(WindowDescriptor::TumblingWindow {
             duration: Duration {
-                amount: 30_000,
+                amount: 10_000,
                 unit: TimeUnit::Milliseconds,
             },
             time_character: TimeCharacteristic::EventTime {
@@ -32,11 +37,12 @@ async fn main() {
                 unit: TimeUnit::Milliseconds,
             },
         })
-        .by_key("features_geometry_coordinates_longitude")
-        .by_key("features_geometry_coordinates_latitude")
+        // .by_key("features_geometry_coordinates_longitude")
+        // .by_key("features_geometry_coordinates_latitude")
         .apply([Aggregation {
             field_name: "features_properties_mag".into(),
-            agg_type: AggregationType::Sum,
+            projected_field_name: None,
+            agg_type: AggregationType::Count,
         }])
         // .filter(LogicalExpr(Expr::Binary {
         //     lhs: Box::new(Expr::Field(Field::untyped("metadata_generated"))),

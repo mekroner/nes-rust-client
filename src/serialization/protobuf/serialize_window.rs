@@ -11,7 +11,9 @@ use prost_types::Any;
 use super::{
     nes::{
         serializable_operator::{
-            time_characteristic, window_details::{aggregation::Type, Aggregation as SerializableAggregation}, TimeCharacteristic as STimeCharacter, TumblingWindow
+            time_characteristic,
+            window_details::{aggregation::Type, Aggregation as SerializableAggregation},
+            TimeCharacteristic as STimeCharacter, TumblingWindow,
         },
         SerializableExpression,
     },
@@ -27,7 +29,8 @@ pub fn serialize_window_descriptor(descriptor: &WindowDescriptor) -> Any {
             time_characteristic: Some(serialize_time_characteristic(time_character)),
             size: duration.to_milliseconds(),
         }),
-    }.unwrap()
+    }
+    .unwrap()
 }
 
 pub fn serialize_time_characteristic(time_character: &TimeCharacteristic) -> STimeCharacter {
@@ -46,8 +49,14 @@ pub fn serialize_aggregations(aggregations: &[Aggregation]) -> Vec<SerializableA
         .iter()
         .map(|agg| SerializableAggregation {
             r#type: serialize_aggregation_type(agg.agg_type).into(),
-            on_field: Some(serialize_expression(&Expr::Field(Field::untyped(agg.field_name)))),
-            as_field: None,
+            on_field: Some(serialize_expression(&Expr::Field(Field::untyped(
+                agg.field_name.clone(),
+            )))),
+            as_field: Some(serialize_expression(&Expr::Field(Field::untyped(
+                agg.projected_field_name
+                    .clone()
+                    .unwrap_or(agg.field_name.clone()),
+            )))),
         })
         .collect()
 }
