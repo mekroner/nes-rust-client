@@ -38,8 +38,8 @@ impl TimeUnit {
 
 #[derive(Debug)]
 pub struct Duration {
-    amount: u32,
-    unit: TimeUnit,
+    pub amount: u32,
+    pub unit: TimeUnit,
 }
 
 impl Duration {

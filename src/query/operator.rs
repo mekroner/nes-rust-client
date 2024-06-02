@@ -1,4 +1,9 @@
-use super::{expression::LogicalExpression, window::WindowDescriptor};
+use super::{
+    expression::LogicalExpression,
+    window::{
+        aggregation::Aggregation, window_descriptor::WindowDescriptor,
+    },
+};
 
 #[derive(Debug)]
 pub enum Operator {
@@ -11,6 +16,8 @@ pub enum Operator {
     },
     Window {
         descriptor: WindowDescriptor,
+        aggregations: Vec<Aggregation>,
+        key_fields: Option<Vec<String>>,
         child: Option<Box<Operator>>,
     },
 }

@@ -1,5 +1,13 @@
 use nes_rs::{
-    query::{sink::Sink, QueryBuilder},
+    query::{
+        sink::Sink,
+        time::{Duration, TimeCharacteristic, TimeUnit},
+        window::{
+            aggregation::{Aggregation, AggregationType},
+            WindowDescriptor,
+        },
+        QueryBuilder,
+    },
     NebulaStreamRuntime,
 };
 
@@ -13,7 +21,24 @@ async fn main() {
         Ok(sources) => println!("{:?}", sources),
         Err(err) => println!("{}", err),
     }
-    let query = QueryBuilder::from_source("wind_turbines".to_string()).sink(Sink::Print);
+    let query = QueryBuilder::from_source("wind_turbines".to_string())
+        .window(WindowDescriptor::TumblingWindow {
+            duration: Duration {
+                amount: 30_000,
+                unit: TimeUnit::Milliseconds,
+            },
+            time_character: TimeCharacteristic::EventTime {
+                field_name: "features_properties_time".to_string(),
+                unit: TimeUnit::Milliseconds,
+            },
+        })
+        .by_key("features_geometry_coordinates_longitude")
+        .by_key("features_geometry_coordinates_latitude")
+        .apply([Aggregation {
+            field_name: "features_properties_mag".into(),
+            agg_type: AggregationType::Sum,
+        }])
+        .sink(Sink::Print);
     let result = runtime.execute_query(query, "BottomUp".to_string()).await;
     dbg!(result);
     //TODO

@@ -1,4 +1,4 @@
-use super::time::{Duration, TimeCharacteristic};
+use crate::query::time::{Duration, TimeCharacteristic};
 
 #[derive(Debug)]
 pub enum WindowDescriptor {
