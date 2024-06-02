@@ -1,10 +1,5 @@
 use nes_rs::{
     query::{
-        expression::{
-            expression::{BinaryOp, Expr},
-            field::Field,
-            LogicalExpr,
-        },
         sink::Sink,
         time::{Duration, TimeCharacteristic, TimeUnit},
         window::{
@@ -37,18 +32,11 @@ async fn main() {
                 unit: TimeUnit::Milliseconds,
             },
         })
-        // .by_key("features_geometry_coordinates_longitude")
-        // .by_key("features_geometry_coordinates_latitude")
         .apply([Aggregation {
             field_name: "features_properties_mag".into(),
             projected_field_name: None,
             agg_type: AggregationType::Count,
         }])
-        // .filter(LogicalExpr(Expr::Binary {
-        //     lhs: Box::new(Expr::Field(Field::untyped("metadata_generated"))),
-        //     rhs: Box::new(Expr::Literal(0i64.into())),
-        //     operator: BinaryOp::LessEquals,
-        // }))
         .sink(Sink::Print);
     let result = runtime.execute_query(query, "BottomUp".to_string()).await;
     dbg!(result);

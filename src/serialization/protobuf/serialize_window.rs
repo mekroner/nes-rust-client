@@ -73,6 +73,7 @@ const fn serialize_aggregation_type(agg_type: AggregationType) -> Type {
         AT::Count => T::Count,
     }
 }
+
 pub fn serialize_window_keys(key_field: &[String]) -> Vec<SerializableExpression> {
     key_field
         .iter()
