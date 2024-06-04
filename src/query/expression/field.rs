@@ -7,7 +7,6 @@ pub struct Field {
 }
 
 impl Field {
-
     pub fn untyped(name: impl Into<String>) -> Self{
         Self {
             name: name.into(),

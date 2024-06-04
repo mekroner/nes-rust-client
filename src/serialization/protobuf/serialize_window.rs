@@ -1,5 +1,5 @@
 use crate::query::{
-    expression::{expression::Expr, field::Field},
+    expression::{expression::RawExpr, field::Field},
     time::TimeCharacteristic,
     window::{
         aggregation::{Aggregation, AggregationType},
@@ -49,10 +49,10 @@ pub fn serialize_aggregations(aggregations: &[Aggregation]) -> Vec<SerializableA
         .iter()
         .map(|agg| SerializableAggregation {
             r#type: serialize_aggregation_type(agg.agg_type).into(),
-            on_field: Some(serialize_expression(&Expr::Field(Field::untyped(
+            on_field: Some(serialize_expression(&RawExpr::Field(Field::untyped(
                 agg.field_name.clone(),
             )))),
-            as_field: Some(serialize_expression(&Expr::Field(Field::untyped(
+            as_field: Some(serialize_expression(&RawExpr::Field(Field::untyped(
                 agg.projected_field_name
                     .clone()
                     .unwrap_or(agg.field_name.clone()),
@@ -77,6 +77,6 @@ const fn serialize_aggregation_type(agg_type: AggregationType) -> Type {
 pub fn serialize_window_keys(key_field: &[String]) -> Vec<SerializableExpression> {
     key_field
         .iter()
-        .map(|key| serialize_expression(&Expr::Field(Field::untyped(key))))
+        .map(|key| serialize_expression(&RawExpr::Field(Field::untyped(key))))
         .collect()
 }

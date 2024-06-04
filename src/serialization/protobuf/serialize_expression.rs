@@ -13,20 +13,20 @@ use super::{
     serialize_data_type::serialize_data_type,
 };
 use crate::query::expression::{
-    expression::{BinaryOp, Expr, UnaryOp},
+    expression::{BinaryOp, RawExpr, UnaryOp},
     field::Field,
     literal::Literal,
 };
 
-pub fn serialize_expression(expr: &Expr) -> SerializableExpression {
+pub fn serialize_expression(expr: &RawExpr) -> SerializableExpression {
     let data_type = serialize_data_type(expr.data_type());
     let details = match expr {
-        Expr::Literal(literal) => literal_details(literal),
-        Expr::Field(field) => field_details(field),
-        Expr::Unary { expr, operator } => {
+        RawExpr::Literal(literal) => literal_details(literal),
+        RawExpr::Field(field) => field_details(field),
+        RawExpr::Unary { expr, operator } => {
             unary_operator_details(*operator, serialize_expression(expr))
         }
-        Expr::Binary { lhs, rhs, operator } => binary_operator_details(
+        RawExpr::Binary { lhs, rhs, operator } => binary_operator_details(
             *operator,
             serialize_expression(lhs),
             serialize_expression(rhs),

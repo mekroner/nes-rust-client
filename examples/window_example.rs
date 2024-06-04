@@ -38,7 +38,7 @@ async fn main() {
             agg_type: AggregationType::Count,
         }])
         .sink(Sink::Print);
-    let result = runtime.execute_query(query, "BottomUp".to_string()).await;
-    dbg!(result);
+    // let result = runtime.execute_query(query, "BottomUp".to_string()).await;
+    // dbg!(result);
     //TODO
 }

@@ -1,5 +1,5 @@
 use crate::query::{
-    expression::{expression::Expr, field::Field, LogicalExpr},
+    expression::{expression::RawExpr, field::Field, LogicalExpr},
     operator::{Filter, Operator},
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
