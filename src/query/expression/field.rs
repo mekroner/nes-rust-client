@@ -1,6 +1,6 @@
 use super::expression::NESType;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Field {
     name: String,
     data_type: NESType,

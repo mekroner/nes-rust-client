@@ -1,7 +1,6 @@
 use super::expression::NESType;
 
-
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Literal {
     value: String,
     data_type: NESType,
