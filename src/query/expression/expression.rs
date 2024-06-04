@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use super::{
     binary_expression::BinaryExpr, field::Field, literal::Literal, unary_expression::UnaryExpr,
 };
@@ -21,10 +19,6 @@ impl RawExpr {
             RawExpr::Binary(expr) => expr.data_type(),
         }
     }
-
-    // pub fn evaluate(&self, context: &HashMap<String, Literal>) -> Literal {
-    //     unimplemented!()
-    // }
 }
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
