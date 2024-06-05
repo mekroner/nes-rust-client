@@ -7,9 +7,8 @@ pub mod literal;
 pub mod unary_expression;
 
 pub use expression_builder::{ExprBuildError, ExprBuilder};
+pub use field::Field;
 
-#[derive(Debug, PartialEq)]
-pub struct FieldExpr(pub expression::RawExpr);
 #[derive(Debug, PartialEq)]
 pub struct LogicalExpr(pub expression::RawExpr);
 #[derive(Debug, PartialEq)]

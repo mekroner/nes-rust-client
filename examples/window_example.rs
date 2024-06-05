@@ -21,24 +21,27 @@ async fn main() {
         Ok(sources) => println!("{:?}", sources),
         Err(err) => println!("{}", err),
     }
+
+    // The Cpp Query translates into the following query
+    // Query::from("wind_turbines")
+    //      .window(TumblingWindow::of(EventTime(Attribute("features_properties_updated")), Minutes(10)))
+    //      .byKey(Attribute("metadata_id"))
+    //      .apply(Sum(Attribute("features_properties_mag")))
+    //      .sink(...);
     let query = QueryBuilder::from_source("wind_turbines".to_string())
         .window(WindowDescriptor::TumblingWindow {
-            duration: Duration {
-                amount: 10_000,
-                unit: TimeUnit::Milliseconds,
-            },
+            duration: Duration::from_minutes(10),
             time_character: TimeCharacteristic::EventTime {
-                field_name: "features_properties_time".to_string(),
+                field_name: "features_properties_updated".to_string(),
                 unit: TimeUnit::Milliseconds,
             },
         })
-        .apply([Aggregation {
-            field_name: "features_properties_mag".into(),
-            projected_field_name: None,
-            agg_type: AggregationType::Count,
-        }])
+        .by_key("metadata_id")
+        .apply([Aggregation::sum()
+            .on_field("features_properties_mag")
+            .as_field("features_properties_mag_sum")])
         .sink(Sink::Print);
-    // let result = runtime.execute_query(query, "BottomUp".to_string()).await;
-    // dbg!(result);
+    let result = runtime.execute_query(query, "BottomUp".to_string()).await;
+    dbg!(result);
     //TODO
 }

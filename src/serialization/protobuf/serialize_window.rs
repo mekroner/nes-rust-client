@@ -17,7 +17,7 @@ use super::{
         },
         SerializableExpression,
     },
-    serialize_expression::serialize_expression,
+    serialize_expression::{self, serialize_expression, serialize_field},
 };
 
 pub fn serialize_window_descriptor(descriptor: &WindowDescriptor) -> Any {
@@ -48,15 +48,9 @@ pub fn serialize_aggregations(aggregations: &[Aggregation]) -> Vec<SerializableA
     aggregations
         .iter()
         .map(|agg| SerializableAggregation {
-            r#type: serialize_aggregation_type(agg.agg_type).into(),
-            on_field: Some(serialize_expression(&RawExpr::Field(Field::untyped(
-                agg.field_name.clone(),
-            )))),
-            as_field: Some(serialize_expression(&RawExpr::Field(Field::untyped(
-                agg.projected_field_name
-                    .clone()
-                    .unwrap_or(agg.field_name.clone()),
-            )))),
+            r#type: serialize_aggregation_type(agg.agg_type()).into(),
+            on_field: agg.field().map(|f| serialize_field(f)),
+            as_field: agg.projected_field().map(|f| serialize_field(f)),
         })
         .collect()
 }

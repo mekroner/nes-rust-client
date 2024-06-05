@@ -43,6 +43,16 @@ pub fn serialize_expression(expr: &RawExpr) -> SerializableExpression {
     }
 }
 
+pub fn serialize_field(field: &Field) -> SerializableExpression {
+    let data_type = serialize_data_type(field.data_type());
+    let details = field_details(field);
+    SerializableExpression {
+        details: Some(details),
+        children: vec![],
+        stamp: Some(data_type),
+    }
+}
+
 fn literal_details(literal: &Literal) -> prost_types::Any {
     let value = BasicValue {
         r#type: Some(serialize_data_type(literal.data_type())),

@@ -1,16 +1,13 @@
 use super::{
-    expression::LogicalExpr,
-    operator::{Filter, Operator, OperatorIterator},
-    sink::Sink,
-    window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
+    expression::LogicalExpr, join::JoinWhereBuilder, operator::{Filter, Operator, OperatorIterator}, sink::Sink, window::{aggregation::Aggregation, window_descriptor::WindowDescriptor}
 };
 
 #[derive(Debug)]
 pub struct QueryId(i32);
 
 pub struct Query {
-    operator: Operator,
-    sink: Sink,
+    pub(super) operator: Operator,
+    pub(super) sink: Sink,
 }
 
 pub struct WindowedQueryBuilder {
@@ -64,8 +61,8 @@ impl Query {
 }
 
 impl QueryBuilder {
-    pub fn from_source(source_name: String) -> Self {
-        let operator = Operator::LogicalSource { source_name };
+    pub fn from_source(source_name: impl Into<String>) -> Self {
+        let operator = Operator::LogicalSource { source_name: source_name.into() };
         QueryBuilder { operator }
     }
 
@@ -103,11 +100,11 @@ impl QueryBuilder {
         unimplemented!();
     }
 
-    pub fn flat_map(self) -> Self {
+    pub fn join_with(self, query: QueryBuilder) -> JoinWhereBuilder {
         unimplemented!();
     }
 
-    pub fn join_with(self) -> Self {
+    pub fn rename(self, source_name: impl Into<String>) -> Self {
         unimplemented!();
     }
 }

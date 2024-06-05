@@ -25,7 +25,7 @@ impl TimeUnit {
         .to_string()
     }
 
-    pub fn to_scalar(&self) -> u32 {
+    pub const fn to_scalar(&self) -> u32 {
         match self {
             TimeUnit::Milliseconds => 1,
             TimeUnit::Seconds => 1000,

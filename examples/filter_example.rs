@@ -11,12 +11,12 @@ async fn main() {
     let query = QueryBuilder::from_source("wind_turbines".to_string())
         .filter(
             EB::field("metadata_generated")
-                .equals(EB::literal(0i64))
+                .greater_than(EB::literal(0i64))
                 .build_logical()
                 .unwrap(),
         )
         .sink(Sink::Print);
-    // let result = runtime.execute_query(query, "BottomUp".to_string()).await;
-    // dbg!(result);
+    let result = runtime.execute_query(query, "BottomUp".to_string()).await;
+    dbg!(result);
     //TODO
 }

@@ -81,14 +81,6 @@ impl ExprBuilder {
     // arith
 
     // builder
-    // TODO:
-    // pub fn build_field(self) -> Result<FieldExpr, ExprBuildError> {
-    //     if let RawExpr::Field(_) = self.expr {
-    //         return Ok(FieldExpr(self));
-    //     }
-    //     Err(ExprBuildError {})
-    // }
-
     pub fn build_arith(self) -> Result<ArithmeticExpr, ExprBuildError> {
         if let Some(err) = self.error {
             return Err(err);

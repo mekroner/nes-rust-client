@@ -1,5 +1,6 @@
 use super::{
     expression::LogicalExpr,
+    join::Join,
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
 
@@ -21,6 +22,7 @@ pub enum Operator {
         key_fields: Option<Vec<String>>,
         child: Option<Box<Operator>>,
     },
+    // Join(Join),
 }
 
 impl Operator {
@@ -29,6 +31,7 @@ impl Operator {
             Operator::LogicalSource { .. } => None,
             Operator::Filter(Filter { child, .. }) => child.as_deref(),
             Operator::Window { child, .. } => child.as_deref(),
+            // Operator::Join(Join { child, .. }) => child.as_deref(),
         }
     }
 
@@ -62,15 +65,15 @@ mod operator_tests {
     use super::Operator as O;
     // #[test]
     // fn test_operator_iter() {
-    //     let operators = O::Filter {
-    //         child: Some(Box::new(O::LogicalSource {
-    //             source_name: "default".to_string(),
-    //         })),
+    //     let operators = O::Filter(Filter {
     //         expression: LE::Equal(
     //             Box::new(LE::Attribute("value".to_string())),
     //             Box::new(LE::Literal(0)),
     //         ),
-    //     };
+    //         child: Some(Box::new(O::LogicalSource {
+    //             source_name: "default".to_string(),
+    //         })),
+    //     });
     //     let mut iter = operators.iter();
     //     assert!(matches!(iter.next(), Some(O::Filter { .. })));
     //     assert!(matches!(iter.next(), Some(O::LogicalSource { .. })));
