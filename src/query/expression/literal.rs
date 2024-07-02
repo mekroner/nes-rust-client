@@ -1,9 +1,9 @@
-use super::expression::NESType;
+use nes_types::NesType;
 
 #[derive(Debug, PartialEq)]
 pub struct Literal {
     value: String,
-    data_type: NESType,
+    data_type: NesType,
 }
 
 impl Literal {
@@ -11,7 +11,7 @@ impl Literal {
         &self.value
     }
 
-    pub fn data_type(&self) -> NESType {
+    pub fn data_type(&self) -> NesType {
         self.data_type
     }
 }
@@ -20,7 +20,7 @@ impl Into<Literal> for i32 {
     fn into(self) -> Literal {
         Literal {
             value: self.to_string(),
-            data_type: NESType::Int32,
+            data_type: NesType::Int32,
         }
     }
 }
@@ -29,7 +29,7 @@ impl Into<Literal> for i64 {
     fn into(self) -> Literal {
         Literal {
             value: self.to_string(),
-            data_type: NESType::Int64,
+            data_type: NesType::Int64,
         }
     }
 }
@@ -38,7 +38,7 @@ impl Into<Literal> for bool {
     fn into(self) -> Literal {
         Literal {
             value: self.to_string(),
-            data_type: NESType::Bool,
+            data_type: NesType::Bool,
         }
     }
 }

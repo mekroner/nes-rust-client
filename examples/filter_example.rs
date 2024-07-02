@@ -1,12 +1,9 @@
-use nes_rs::{
-    query::{expression::ExprBuilder as EB, sink::Sink, QueryBuilder},
-    NebulaStreamRuntime,
-};
-
-extern crate nebulastream_rust_client as nes_rs;
+use nes_rust_client::prelude::ExprBuilder as EB;
+use nes_rust_client::prelude::*;
 
 #[tokio::main]
 async fn main() {
+    simple_logger::init_with_level(log::Level::Trace).expect("Init simple_logger should not fail!");
     let runtime = NebulaStreamRuntime::new("localhost".to_string(), 8081);
     let query = QueryBuilder::from_source("wind_turbines".to_string())
         .filter(
@@ -16,7 +13,7 @@ async fn main() {
                 .unwrap(),
         )
         .sink(Sink::Print);
-    let result = runtime.execute_query(query, "BottomUp".to_string()).await;
-    dbg!(result);
+    let response = runtime.execute_query(query, "BottomUp".to_string()).await;
+    dbg!(response);
     //TODO
 }

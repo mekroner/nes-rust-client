@@ -6,7 +6,8 @@ use super::{
         serializable_expression::{
             AddExpression, AndExpression, ConstantValueExpression, DivExpression, EqualsExpression,
             FieldAccessExpression, GreaterEqualsExpression, GreaterExpression,
-            LessEqualsExpression, LessExpression, MulExpression, OrExpression, SubExpression,
+            LessEqualsExpression, LessExpression, MulExpression, NegateExpression, OrExpression,
+            SubExpression,
         },
         SerializableDataValue, SerializableExpression,
     },
@@ -21,6 +22,7 @@ use crate::query::expression::{
 };
 
 pub fn serialize_expression(expr: &RawExpr) -> SerializableExpression {
+    log::trace!("Serialize expression: {:?}", expr);
     let data_type = serialize_data_type(expr.data_type());
     let details = match expr {
         RawExpr::Literal(literal) => literal_details(literal),
@@ -75,8 +77,19 @@ fn field_details(field: &Field) -> prost_types::Any {
     Any::from_msg(&expr).unwrap()
 }
 
+macro_rules! unary_op {
+    ($child:expr, $expr:ident) => {
+        Any::from_msg(&$expr {
+            child: Some($child),
+        })
+    };
+}
+
 fn unary_operator_details(operator: UnaryOp, child: SerializableExpression) -> prost_types::Any {
-    todo!()
+    match operator {
+        UnaryOp::Negate => unary_op!(child, NegateExpression),
+    }
+    .unwrap()
 }
 
 macro_rules! binary_op {

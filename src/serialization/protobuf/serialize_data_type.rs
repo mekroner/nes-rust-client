@@ -1,29 +1,28 @@
 use prost_types::Any;
 
-use crate::query::expression::expression::NESType;
-
+use nes_types::NesType;
 use super::nes::{
     serializable_data_type::{FloatDetails, IntegerDetails, Type},
     SerializableDataType,
 };
 
-pub fn serialize_data_type(data_type: NESType) -> SerializableDataType {
+pub fn serialize_data_type(data_type: NesType) -> SerializableDataType {
     let (serial_type, details) = match data_type {
-        NESType::Undefined => (Type::Undefined, None),
-        NESType::Char => (Type::Char, None),
-        NESType::Bool => (Type::Boolean, None),
-        NESType::Int32 => (
+        NesType::Undefined => (Type::Undefined, None),
+        NesType::Char => (Type::Char, None),
+        NesType::Bool => (Type::Boolean, None),
+        NesType::Int32 => (
             Type::Integer,
             Some(Any::from_msg(&int32_details()).unwrap()),
         ),
-        NESType::Int64 => (
+        NesType::Int64 => (
             Type::Integer,
             Some(Any::from_msg(&int64_details()).unwrap()),
         ),
-        NESType::Float32 => (Type::Float, 
+        NesType::Float32 => (Type::Float, 
             Some(Any::from_msg(&float32_details()).unwrap()),
         ),
-        NESType::Float64 => (Type::Float, 
+        NesType::Float64 => (Type::Float, 
             Some(Any::from_msg(&float64_details()).unwrap()),
         ),
     };

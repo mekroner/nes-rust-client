@@ -71,6 +71,6 @@ const fn serialize_aggregation_type(agg_type: AggregationType) -> Type {
 pub fn serialize_window_keys(key_field: &[String]) -> Vec<SerializableExpression> {
     key_field
         .iter()
-        .map(|key| serialize_expression(&RawExpr::Field(Field::untyped(key))))
+        .map(|key| serialize_field(&Field::untyped(key)))
         .collect()
 }

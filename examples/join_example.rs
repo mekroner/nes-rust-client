@@ -1,14 +1,10 @@
-use nes_rs::{
-    query::{
-        sink::Sink,
-        time::{Duration, TimeCharacteristic, TimeUnit},
-        window::window_descriptor::WindowDescriptor,
-        QueryBuilder,
-    },
-    NebulaStreamRuntime,
+use nes_rs::prelude::*;
+use nes_rs::query::{
+    time::{Duration, TimeCharacteristic, TimeUnit},
+    window::window_descriptor::WindowDescriptor,
 };
 
-extern crate nebulastream_rust_client as nes_rs;
+extern crate nes_rust_client as nes_rs;
 
 #[tokio::main]
 async fn main() {

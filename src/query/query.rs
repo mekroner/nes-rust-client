@@ -1,10 +1,11 @@
 use super::{
-    expression::LogicalExpr, join::JoinWhereBuilder, operator::{Filter, Operator, OperatorIterator}, sink::Sink, window::{aggregation::Aggregation, window_descriptor::WindowDescriptor}
+    expression::LogicalExpr, join::JoinWhereBuilder, operator::{Filter, Operator, OperatorIterator, Union, Window}, sink::Sink, window::{aggregation::Aggregation, window_descriptor::WindowDescriptor}
 };
 
 #[derive(Debug)]
 pub struct QueryId(i32);
 
+#[derive(Debug)]
 pub struct Query {
     pub(super) operator: Operator,
     pub(super) sink: Sink,
@@ -29,12 +30,12 @@ impl WindowedQueryBuilder {
     pub fn apply(mut self, aggregation: impl IntoIterator<Item = Aggregation>) -> QueryBuilder {
         let child_operator = self.query_builder.operator;
         let aggregations = aggregation.into_iter().collect();
-        self.query_builder.operator = Operator::Window {
+        self.query_builder.operator = Operator::Window(Window {
             child: Some(Box::new(child_operator)),
             descriptor: self.descriptor,
             aggregations,
             key_fields: self.key_fields,
-        };
+        });
         self.query_builder
     }
 }
@@ -100,8 +101,17 @@ impl QueryBuilder {
         unimplemented!();
     }
 
-    pub fn join_with(self, query: QueryBuilder) -> JoinWhereBuilder {
+    pub fn join_with(self, query: Self) -> JoinWhereBuilder {
         unimplemented!();
+    }
+
+    pub fn union(mut self, query: Self) -> Self {
+        let child_operator = self.operator;
+        self.operator = Operator::Union(Union {
+            child: Some(Box::new(child_operator)),
+            operators: Box::new(query.operator),
+        });
+        self
     }
 
     pub fn rename(self, source_name: impl Into<String>) -> Self {

@@ -1,15 +1,17 @@
-use super::expression::{RawExpr, NESType};
+use nes_types::NesType;
+
+use super::expression::RawExpr;
 
 #[derive(Debug, PartialEq)]
 pub struct BinaryExpr {
     pub lhs: Box<RawExpr>,
     pub rhs: Box<RawExpr>,
     pub operator: BinaryOp,
-    pub data_type: NESType,
+    pub data_type: NesType,
 }
 
 impl BinaryExpr {
-    pub fn data_type(&self) -> NESType {
+    pub fn data_type(&self) -> NesType {
         self.data_type
     }
 }

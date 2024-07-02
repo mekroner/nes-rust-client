@@ -1,10 +1,10 @@
-use super::expression::NESType;
+use nes_types::NesType;
 
 #[derive(Debug, PartialEq)]
 pub struct Field {
     name: String,
     projected_name: Option<String>,
-    data_type: NESType,
+    data_type: NesType,
 }
 
 impl Field {
@@ -12,11 +12,11 @@ impl Field {
         Self {
             name: name.into(),
             projected_name: None,
-            data_type: NESType::Undefined,
+            data_type: NesType::Undefined,
         }
     }
 
-    pub fn typed(name: impl Into<String>, data_type: NESType) -> Self{
+    pub fn typed(name: impl Into<String>, data_type: NesType) -> Self{
         Self {
             name: name.into(),
             projected_name: None,
@@ -37,7 +37,7 @@ impl Field {
         self.projected_name.as_deref()
     }
 
-    pub fn data_type(&self) -> NESType {
+    pub fn data_type(&self) -> NesType {
         self.data_type
     }
 }

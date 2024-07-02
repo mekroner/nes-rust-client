@@ -60,6 +60,7 @@ impl NebulaStreamRuntime {
         query: Query,
         placement: String,
     ) -> Result<(), Box<reqwest::Error>> {
+        log::info!("Attempting to Execute Query: {:?}", query);
         let query_plan = protobuf::serialize_query::serialize(query);
         let placement = prost_types::Any {
             type_url: "type.googleapis.com/google.protobuf.StringValue".to_string(),
@@ -82,30 +83,6 @@ impl NebulaStreamRuntime {
         dbg!(response);
         Ok(())
     }
-
-    // FIXME: This should support grpc, so we need a RequestHandler Interface
-    // pub async fn execute_query_rest(
-    //     &self,
-    //     query: Query,
-    //     placement: String,
-    // ) -> Result<QueryId, reqwest::Error> {
-    //     let serialized_query = cpp::serialize_query::serialize(query);
-
-    //     let mut payload = HashMap::new();
-    //     payload.insert("placement", placement);
-    //     payload.insert("userQuery", serialized_query);
-
-    //     let client = reqwest::Client::builder().build().unwrap();
-    //     let response = client
-    //         .post(self.coordinator_url("/v1/nes/query/execute-query"))
-    //         .json(&payload)
-    //         .send()
-    //         .await?;
-    //     // handle response
-    //     let body = response.text().await?;
-    //     println!("{}", body);
-    //     todo!()
-    // }
 
     pub async fn logical_sources(&self) -> Result<Vec<String>, reqwest::Error> {
         let response =

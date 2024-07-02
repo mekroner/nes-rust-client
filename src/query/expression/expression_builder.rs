@@ -1,8 +1,10 @@
 use std::{error::Error, fmt::Display};
 
+use nes_types::NesType;
+
 use super::{
     binary_expression::{BinaryExpr, BinaryOp},
-    expression::{NESType, RawExpr},
+    expression::RawExpr,
     expression_builder_macros::{boolean_operator, cmp_operator},
     field::Field,
     literal::Literal,
@@ -45,7 +47,7 @@ impl ExprBuilder {
         }
     }
 
-    pub fn typed_field(name: impl Into<String>, data_type: NESType) -> Self {
+    pub fn typed_field(name: impl Into<String>, data_type: NesType) -> Self {
         Self {
             expr: RawExpr::Field(Field::typed(name, data_type)),
             error: None,
@@ -55,10 +57,10 @@ impl ExprBuilder {
     // unary logical
     pub fn not(mut self) -> Self {
         let data_type = match self.expr.data_type() {
-            NESType::Undefined | NESType::Bool => NESType::Bool,
+            NesType::Undefined | NesType::Bool => NesType::Bool,
             _ => {
                 self.error = Some(ExprBuildError {});
-                NESType::Undefined
+                NesType::Undefined
             }
         };
         self.expr = RawExpr::Unary(UnaryExpr {
@@ -86,7 +88,7 @@ impl ExprBuilder {
             return Err(err);
         }
         match self.expr.data_type() {
-            NESType::Float32 | NESType::Float64 | NESType::Int64 | NESType::Int32 => {
+            NesType::Float32 | NesType::Float64 | NesType::Int64 | NesType::Int32 => {
                 Ok(ArithmeticExpr(self.expr))
             }
             _ => Err(ExprBuildError {}),
@@ -97,7 +99,7 @@ impl ExprBuilder {
         if let Some(err) = self.error {
             return Err(err);
         }
-        if NESType::Bool == self.expr.data_type() {
+        if NesType::Bool == self.expr.data_type() {
             return Ok(LogicalExpr(self.expr));
         }
         Err(ExprBuildError {})
@@ -106,9 +108,9 @@ impl ExprBuilder {
 
 #[cfg(test)]
 mod expression_builder_test {
+    use nes_types::NesType;
     use crate::query::expression::binary_expression::BinaryExpr;
     use crate::query::expression::binary_expression::BinaryOp;
-    use crate::query::expression::expression::NESType;
     use crate::query::expression::expression::RawExpr as RE;
     use crate::query::expression::field::Field;
     use crate::query::expression::unary_expression::{UnaryExpr, UnaryOp};
@@ -148,14 +150,14 @@ mod expression_builder_test {
         let expected = LogicalExpr(RE::Unary(UnaryExpr {
             expr: Box::new(RE::Literal(true.into())),
             operator: UnaryOp::Negate,
-            data_type: NESType::Bool,
+            data_type: NesType::Bool,
         }));
         assert_eq!(expected, expr);
         let expr = EB::field("value").not().build_logical().unwrap();
         let expected = LogicalExpr(RE::Unary(UnaryExpr {
             expr: Box::new(RE::Field(Field::untyped("value"))),
             operator: UnaryOp::Negate,
-            data_type: NESType::Bool,
+            data_type: NesType::Bool,
         }));
         assert_eq!(expected, expr);
         assert!(EB::literal(0).not().build_logical().is_err());
@@ -171,7 +173,7 @@ mod expression_builder_test {
             lhs: Box::new(RE::Literal(0.into())),
             rhs: Box::new(RE::Literal(2.into())),
             operator: BinaryOp::Equals,
-            data_type: NESType::Bool,
+            data_type: NesType::Bool,
         }));
         assert_eq!(expected, expr);
         assert!(EB::literal(0)
@@ -194,7 +196,7 @@ mod expression_builder_test {
             lhs: Box::new(RE::Literal(true.into())),
             rhs: Box::new(RE::Literal(false.into())),
             operator: BinaryOp::And,
-            data_type: NESType::Bool,
+            data_type: NesType::Bool,
         }));
         assert_eq!(expected, expr);
         assert!(EB::literal(0).and(EB::literal(0)).build_logical().is_err());
@@ -218,7 +220,7 @@ mod expression_builder_test {
             lhs: Box::new(RE::Literal(true.into())),
             rhs: Box::new(RE::Literal(false.into())),
             operator: BinaryOp::Or,
-            data_type: NESType::Bool,
+            data_type: NesType::Bool,
         }));
         assert_eq!(expected, expr);
         assert!(EB::literal(0).or(EB::literal(0)).build_logical().is_err());

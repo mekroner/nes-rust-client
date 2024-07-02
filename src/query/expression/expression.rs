@@ -1,3 +1,7 @@
+use std::fmt::Display;
+
+use nes_types::NesType;
+
 use super::{
     binary_expression::BinaryExpr, field::Field, literal::Literal, unary_expression::UnaryExpr,
 };
@@ -11,7 +15,7 @@ pub enum RawExpr {
 }
 
 impl RawExpr {
-    pub fn data_type(&self) -> NESType {
+    pub fn data_type(&self) -> NesType {
         match self {
             RawExpr::Literal(literal) => literal.data_type(),
             RawExpr::Field(field) => field.data_type(),
@@ -21,27 +25,33 @@ impl RawExpr {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NESType {
-    #[default]
-    Undefined,
-    Bool,
-    Char,
-    Int32,
-    Int64,
-    Float32,
-    Float64,
-}
-
-impl NESType {
-    // TODO: Add type conversion.
-    pub fn try_resolve(data_type1: NESType, data_type2: NESType) -> Option<NESType> {
-        use NESType as T;
-        match (data_type1, data_type2) {
-            (T::Undefined, T::Undefined) => Some(T::Undefined),
-            (T::Undefined, t) | (t, T::Undefined) => Some(t),
-            (a, b) if a == b => Some(a),
-            _ => None,
-        }
+impl Display for RawExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!();
     }
 }
+
+// #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+// pub enum NESType {
+//     #[default]
+//     Undefined,
+//     Bool,
+//     Char,
+//     Int32,
+//     Int64,
+//     Float32,
+//     Float64,
+// }
+
+// impl NESType {
+//     // TODO: Add type conversion.
+//     pub fn try_resolve(data_type1: NESType, data_type2: NESType) -> Option<NESType> {
+//         use NESType as T;
+//         match (data_type1, data_type2) {
+//             (T::Undefined, T::Undefined) => Some(T::Undefined),
+//             (T::Undefined, t) | (t, T::Undefined) => Some(t),
+//             (a, b) if a == b => Some(a),
+//             _ => None,
+//         }
+//     }
+// }

@@ -1,5 +1,5 @@
-extern crate nebulastream_rust_client as nes_rs;
-use nes_rs::*;
+extern crate nes_rust_client as nes_rs;
+use nes_rs::prelude::*;
 
 #[tokio::main]
 async fn main(){

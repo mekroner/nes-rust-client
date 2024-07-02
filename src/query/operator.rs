@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use super::{
     expression::LogicalExpr,
     join::Join,
@@ -11,18 +13,26 @@ pub struct Filter {
 }
 
 #[derive(Debug)]
+pub struct Window {
+    pub descriptor: WindowDescriptor,
+    pub aggregations: Vec<Aggregation>,
+    pub key_fields: Option<Vec<String>>,
+    pub child: Option<Box<Operator>>,
+}
+
+#[derive(Debug)]
+pub struct Union {
+    pub operators: Box<Operator>,
+    pub child: Option<Box<Operator>>,
+}
+
+#[derive(Debug)]
 pub enum Operator {
-    LogicalSource {
-        source_name: String,
-    },
+    LogicalSource { source_name: String },
     Filter(Filter),
-    Window {
-        descriptor: WindowDescriptor,
-        aggregations: Vec<Aggregation>,
-        key_fields: Option<Vec<String>>,
-        child: Option<Box<Operator>>,
-    },
-    // Join(Join),
+    Window(Window),
+    Join(Join),
+    Union(Union),
 }
 
 impl Operator {
@@ -30,8 +40,9 @@ impl Operator {
         match self {
             Operator::LogicalSource { .. } => None,
             Operator::Filter(Filter { child, .. }) => child.as_deref(),
-            Operator::Window { child, .. } => child.as_deref(),
-            // Operator::Join(Join { child, .. }) => child.as_deref(),
+            Operator::Window(Window { child, .. }) => child.as_deref(),
+            Operator::Join(Join { child, .. }) => child.as_deref(),
+            Operator::Union(Union {child, ..}) => child.as_deref(),
         }
     }
 
@@ -42,6 +53,18 @@ impl Operator {
     pub fn iter(&self) -> OperatorIterator {
         OperatorIterator {
             current: Some(self),
+        }
+    }
+}
+
+impl Display for Operator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Operator::LogicalSource { source_name } => write!(f, "LogicalSource({source_name})"),
+            Operator::Filter(_) => write!(f, "Filter(TODO!!!)"),
+            Operator::Window(_) => write!(f, "Window(TODO!!!)"),
+            Operator::Join(_) => write!(f, "Join(TODO!!!)"),
+            Operator::Union(_) => write!(f, "Union(TODO!!!)"),
         }
     }
 }

@@ -11,6 +11,7 @@ use super::nes::serializable_operator::{
 };
 
 pub fn serialize_sink_details(sink: &Sink) -> prost_types::Any {
+    log::trace!("Serializing Sink: {:?}", sink);
     let details = match sink {
         Sink::NullOutput => null_sink_details(),
         Sink::Print => print_sink_details(),
