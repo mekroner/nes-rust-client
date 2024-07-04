@@ -47,12 +47,22 @@ pub fn serialize_time_characteristic(time_character: &TimeCharacteristic) -> STi
 pub fn serialize_aggregations(aggregations: &[Aggregation]) -> Vec<SerializableAggregation> {
     aggregations
         .iter()
-        .map(|agg| SerializableAggregation {
-            r#type: serialize_aggregation_type(agg.agg_type()).into(),
-            on_field: agg.field().map(|f| serialize_field(f)),
-            as_field: agg.projected_field().map(|f| serialize_field(f)),
-        })
+        .map(|agg| serialize_aggregation(agg))
         .collect()
+}
+
+fn serialize_aggregation(aggregation: &Aggregation) -> SerializableAggregation {
+    let on_field = match aggregation.agg_type() {
+        AggregationType::Count => Some(serialize_field(&"count".into())),
+        _ => aggregation.field().map(|f| serialize_field(f)),
+    };
+    SerializableAggregation {
+        r#type: serialize_aggregation_type(aggregation.agg_type()).into(),
+        as_field: aggregation
+            .projected_field()
+            .map_or(on_field.clone(), |f| Some(serialize_field(f))),
+        on_field,
+    }
 }
 
 const fn serialize_aggregation_type(agg_type: AggregationType) -> Type {

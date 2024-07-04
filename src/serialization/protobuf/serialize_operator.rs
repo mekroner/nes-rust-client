@@ -20,47 +20,8 @@ use super::{
     },
 };
 
-//FIXME: this does not work
-pub fn serialize_operator(
-    operators: &Operator,
-    id: &mut u64,
-    map: &mut HashMap<u64, SerializableOperator>,
-) {
-    for op in operators.iter() {
-        // fill operators details
-        let builder = SerializableOperatorBuilder::new()
-            .details(serialize_operator_details(op))
-            .operator_id(*id);
-        // this is kind of hacky but we need a simple way to add joined and union queries to the
-        // query tree
-        let builder = match op {
-            Operator::Join(join) => {
-                let child_id = *id;
-                serialize_operator(&join.joined_operators, id, map);
-                builder.add_child_id(child_id)
-            }
-            Operator::Union(join) => {
-                let child_id = *id;
-                serialize_operator(&join.operators, id, map);
-                builder.add_child_id(child_id)
-            }
-            _ => builder,
-        };
-        // add childs id to child_ids field
-        let serial_op = match op.has_child() {
-            true => builder.add_child_id(*id + 1),
-            false => builder,
-        }
-        .build();
-        log::trace!(
-            "Serialized operator {}, with id {}, and children_ids {:?}",
-            op,
-            id,
-            serial_op.children_ids
-        );
-        map.insert(*id, serial_op);
-        *id += 1;
-    }
+pub fn serialize_operator(operators: &Operator) -> u64 {
+    todo!();
 }
 
 pub fn traverse_operators(

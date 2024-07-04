@@ -18,57 +18,52 @@ pub struct Aggregation {
 }
 
 impl Aggregation {
-    pub fn count(field: impl Into<Field>) -> Self {
+    pub fn count() -> Self {
         Self {
-            field: Some(field.into()),
+            field: None,
             projected_field: None,
             agg_type: AggregationType::Count,
         }
     }
 
-    pub fn sum() -> Self {
+    pub fn sum(field: impl Into<Field>) -> Self {
         Self {
-            field: None,
+            field: Some(field.into()),
             projected_field: None,
             agg_type: AggregationType::Sum,
         }
     }
 
-    pub fn average() -> Self {
+    pub fn average(field: impl Into<Field>) -> Self {
         Self {
-            field: None,
+            field: Some(field.into()),
             projected_field: None,
             agg_type: AggregationType::Average,
         }
     }
 
-    pub fn min() -> Self {
+    pub fn min(field: impl Into<Field>) -> Self {
         Self {
-            field: None,
+            field: Some(field.into()),
             projected_field: None,
             agg_type: AggregationType::Min,
         }
     }
 
-    pub fn max() -> Self {
+    pub fn max(field: impl Into<Field>) -> Self {
         Self {
-            field: None,
+            field: Some(field.into()),
             projected_field: None,
             agg_type: AggregationType::Max,
         }
     }
 
-    pub fn median() -> Self {
+    pub fn median(field: impl Into<Field>) -> Self {
         Self {
-            field: None,
+            field: Some(field.into()),
             projected_field: None,
             agg_type: AggregationType::Median,
         }
-    }
-
-    pub fn on_field(mut self, field: impl Into<Field>) -> Self {
-        self.field = Some(field.into());
-        self
     }
 
     pub fn as_field(mut self, field: impl Into<Field>) -> Self {
