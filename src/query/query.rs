@@ -1,9 +1,12 @@
-use super::{
-    expression::LogicalExpr, join::JoinWhereBuilder, operator::{Filter, Operator, OperatorIterator, Union, Window}, sink::Sink, window::{aggregation::Aggregation, window_descriptor::WindowDescriptor}
-};
+use std::fmt::Display;
 
-#[derive(Debug)]
-pub struct QueryId(i32);
+use super::{
+    expression::LogicalExpr,
+    join::JoinWhereBuilder,
+    operator::{Filter, Operator, OperatorIterator, Union, Window},
+    sink::Sink,
+    window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
+};
 
 #[derive(Debug)]
 pub struct Query {
@@ -63,7 +66,9 @@ impl Query {
 
 impl QueryBuilder {
     pub fn from_source(source_name: impl Into<String>) -> Self {
-        let operator = Operator::LogicalSource { source_name: source_name.into() };
+        let operator = Operator::LogicalSource {
+            source_name: source_name.into(),
+        };
         QueryBuilder { operator }
     }
 

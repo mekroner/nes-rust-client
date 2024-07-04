@@ -1,19 +1,18 @@
-use std::collections::HashMap;
+use crate::query::{Query, QueryBuilder};
+use crate::serialization::protobuf::serialize_query::serialize_request;
 
-// use self::health::HealthCheckRequest;
+pub enum PlacementStrategy {
+    BottomUp,
+}
 
-use prost::Message;
-
-use crate::query::{Query, QueryId};
-// use crate::serialization::protobuf::serialize_query::serialize;
-use crate::{
-    // runtime::nebula_stream_runtime::health::health_client::HealthClient,
-    serialization::{cpp, protobuf},
-};
-
-// mod health {
-//     tonic::include_proto!("grpc.health.v1");
-// }
+impl ToString for PlacementStrategy {
+    fn to_string(&self) -> String {
+        match self {
+            PlacementStrategy::BottomUp => "BottomUp",
+        }
+        .to_string()
+    }
+}
 
 pub struct NebulaStreamConfig {
     host: String,
@@ -25,72 +24,79 @@ pub struct NebulaStreamRuntime {
 }
 
 impl NebulaStreamRuntime {
-    pub fn new(host: String, port: i32) -> Self {
+    // FIXME: This shoudl use make use or rusts IP address type
+    pub fn new(host: impl Into<String>, port: i32) -> Self {
         let config = NebulaStreamConfig {
-            host,
+            host: host.into(),
             port: port.to_string(),
         };
         Self { config }
     }
 
-    // pub async fn check_health(&self) -> Result<(), Box<dyn std::error::Error>> {
-    //     let mut client = HealthClient::connect("http://127.0.0.1:4000").await?;
-    //     let request = HealthCheckRequest {
-    //         service: "NES_DEFAULT_HEALTH_CHECK_SERVICE".to_string(),
-    //     };
-    //     let response = client.check(request).await?;
-    //     println!("{:?}", response.into_inner());
-    //     Ok(())
-    // }
-
+    // FIXME: This should return false if reqwest cannot connect to coord
     pub async fn check_connection(&self) -> Result<bool, reqwest::Error> {
+        log::info!("Checking connection.");
         let response = reqwest::get(self.coordinator_url("/v1/nes/connectivity/check")).await?;
-        println!("Status: {}", response.status());
+        log::debug!("Response status: {}", response.status());
         let body = response.text().await?;
-        println!("Body: {}", body);
-        Ok(true)
+        log::debug!("Response body: {}", body);
+        let json_value: serde_json::Value = serde_json::from_str(&body).unwrap();
+        let Some(serde_json::Value::Bool(is_connected)) = json_value.get("success") else {
+            panic!("Expected body to contain success field")
+        };
+        Ok(*is_connected)
     }
 
-    pub fn from_source(source_name: String) -> Query {
-        unimplemented!();
+    pub fn from_source(&self, source_name: impl Into<String>) -> QueryBuilder {
+        QueryBuilder::from_source(source_name)
     }
 
     pub async fn execute_query(
         &self,
-        query: Query,
-        placement: String,
-    ) -> Result<(), Box<reqwest::Error>> {
+        query: &Query,
+        placement: PlacementStrategy,
+    ) -> Result<i64, reqwest::Error> {
         log::info!("Attempting to Execute Query: {:?}", query);
-        let query_plan = protobuf::serialize_query::serialize(query);
-        let placement = prost_types::Any {
-            type_url: "type.googleapis.com/google.protobuf.StringValue".to_string(),
-            value: placement.bytes().collect::<Vec<u8>>(),
-        };
-        let mut context = HashMap::new();
-        context.insert("placement".to_string(), placement);
-        let request = protobuf::nes::SubmitQueryRequest {
-            query_plan: Some(query_plan),
-            context,
-            query_string: None,
-        };
         let client = reqwest::Client::builder().build().unwrap();
+        let request = serialize_request(query, placement);
         let response = client
             .post(self.coordinator_url("/v1/nes/query/execute-query-ex"))
-            .body(request.encode_to_vec())
+            .body(request)
             .send()
             .await?;
 
-        dbg!(response);
-        Ok(())
+        log::debug!("Response status: {}", response.status());
+        let body = response.text().await?;
+        log::debug!("Response body: {}", body);
+        let json_value: serde_json::Value = serde_json::from_str(&body).unwrap();
+        let Some(serde_json::Value::Number(number)) = json_value.get("queryId") else {
+            panic!("The response by the coordinator did not contain a query ID")
+        };
+        let Some(query_id) = number.as_i64() else {
+            panic!("Expected query ID to be i64!");
+        };
+        Ok(query_id)
+    }
+
+    pub fn query_status(query_id: i64) -> Result<String, reqwest::Error> {
+        todo!();
+    }
+
+    pub fn stop_query(query_id: i64) -> Result<String, reqwest::Error> {
+        todo!();
     }
 
     pub async fn logical_sources(&self) -> Result<Vec<String>, reqwest::Error> {
+        log::info!("Requesting logical sources.");
         let response =
             reqwest::get(self.coordinator_url("/v1/nes/sourceCatalog/allLogicalSource")).await?;
+        log::debug!("Response status: {}", response.status());
         let body = response.text().await?;
-        let value: serde_json::Value = serde_json::from_str(&body).unwrap();
-        let serde_json::Value::Array(json_arr) = value else {
-            panic!("Value should be a JSON Array!")
+        log::debug!("Response body: {}", body);
+        let serde_json::Value::Array(json_arr) =
+            serde_json::from_str(&body).expect("Parsing JSON should not fail!")
+        else {
+            panic!("Body should be a JSON Array!")
         };
         let mut source_list = Vec::new();
         for val in json_arr {

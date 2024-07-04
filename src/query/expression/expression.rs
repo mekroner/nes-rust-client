@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use nes_types::NesType;
 
 use super::{
@@ -22,12 +20,6 @@ impl RawExpr {
             RawExpr::Unary(expr) => expr.data_type(),
             RawExpr::Binary(expr) => expr.data_type(),
         }
-    }
-}
-
-impl Display for RawExpr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!();
     }
 }
 

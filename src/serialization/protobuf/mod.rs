@@ -6,6 +6,6 @@ mod serialize_data_type;
 mod serialize_window;
 
 
-pub(crate) mod nes {
+pub(super) mod nes {
     include!(concat!(env!("OUT_DIR"), "/nes.rs"));
 }

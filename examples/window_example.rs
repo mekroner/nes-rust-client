@@ -1,7 +1,5 @@
-use nes_rs::prelude::*;
-use nes_rs::query::time::{Duration, TimeCharacteristic, TimeUnit};
-
-extern crate nes_rust_client as nes_rs;
+use nes_rust_client::prelude::*;
+use nes_rust_client::query::time::{Duration, TimeCharacteristic, TimeUnit};
 
 #[tokio::main]
 async fn main() {
@@ -14,7 +12,7 @@ async fn main() {
     //      .byKey(Attribute("metadata_id"))
     //      .apply(Sum(Attribute("features_properties_mag")))
     //      .sink(...);
-    let query = QueryBuilder::from_source("wind_turbines")
+    let query = runtime.from_source("wind_turbines")
         .window(WindowDescriptor::TumblingWindow {
             duration: Duration::from_minutes(10),
             time_character: TimeCharacteristic::EventTime {
@@ -25,12 +23,15 @@ async fn main() {
         // FIXME: Fails for some reason metadata_id fails
         // .by_key("metadata_id")
         .by_key("features_properties_capacity")
-        .apply([Aggregation::sum()
-            .on_field("features_properties_mag")
-            .as_field("features_properties_mag_sum")])
+        .apply(
+            [Aggregation::sum("features_properties_mag").as_field("features_properties_mag_sum")],
+        )
         .sink(Sink::Print);
     // send query
-    let response = runtime.execute_query(query, "BottomUp".to_string()).await;
-    dbg!(response);
-    //TODO
+
+    let response = runtime.execute_query(&query, PlacementStrategy::BottomUp).await;
+    match response {
+        Ok(query_id) => log::info!("Started Execution of query with id: {query_id}"),
+        Err(err) => log::error!("Failed to execute query: {:?}", err),
+    }
 }
