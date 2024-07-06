@@ -43,9 +43,6 @@ impl WindowedQueryBuilder {
     }
 }
 
-// FIXME: I should use a QueryBuilder.
-// The QueryBuilder::sink() should be the last element in the chain and build the Query.
-// Each operator in the chain should return Result<QueryBuilder, QueryBuildError>
 pub struct QueryBuilder {
     operator: Operator,
 }
@@ -72,8 +69,6 @@ impl QueryBuilder {
         QueryBuilder { operator }
     }
 
-    // NOTE: This violates single responsibility principle. Maybe we should use a dedicated build
-    // function
     pub fn sink(self, sink: Sink) -> Query {
         Query {
             sink,

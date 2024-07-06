@@ -51,19 +51,19 @@ fn main() {
         )
         .sink(Sink::csv_file("./result.csv", true));
 
-    let q_join = QueryBuilder::from_source("orders")
-        .join_with(QueryBuilder::from_source("products"))
-        .where_field("products")
-        .equals("id")
-        .window(WindowDescriptor::TumblingWindow {
-            duration: Duration::from_seconds(10),
-            time_character: TimeCharacteristic::EventTime {
-                field_name: "ts".to_string(),
-                unit: TimeUnit::Milliseconds,
-            },
-        })
-        .sink(Sink::null());
-    let queries = [q_window, q_filter, q_union, q_join];
+    // let q_join = QueryBuilder::from_source("orders")
+    //     .join_with(QueryBuilder::from_source("products"))
+    //     .where_field("products")
+    //     .equals("id")
+    //     .window(WindowDescriptor::TumblingWindow {
+    //         duration: Duration::from_seconds(10),
+    //         time_character: TimeCharacteristic::EventTime {
+    //             field_name: "ts".to_string(),
+    //             unit: TimeUnit::Milliseconds,
+    //         },
+    //     })
+    //     .sink(Sink::null());
+    let queries = [q_window, q_filter, q_union,];
     for (i, q) in queries.iter().enumerate() {
         log::info!("Query {i}: {}", stringify_query(q));
     }
