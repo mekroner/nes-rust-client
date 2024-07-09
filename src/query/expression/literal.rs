@@ -7,6 +7,12 @@ pub struct Literal {
 }
 
 impl Literal {
+    pub fn typed(value: impl Into<String>, data_type: NesType) -> Self {
+        Self {
+            value: value.into(),
+            data_type,
+        }
+    }
     pub fn value(&self) -> &str {
         &self.value
     }

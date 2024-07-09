@@ -23,27 +23,4 @@ impl RawExpr {
     }
 }
 
-// #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
-// pub enum NESType {
-//     #[default]
-//     Undefined,
-//     Bool,
-//     Char,
-//     Int32,
-//     Int64,
-//     Float32,
-//     Float64,
-// }
 
-// impl NESType {
-//     // TODO: Add type conversion.
-//     pub fn try_resolve(data_type1: NESType, data_type2: NESType) -> Option<NESType> {
-//         use NESType as T;
-//         match (data_type1, data_type2) {
-//             (T::Undefined, T::Undefined) => Some(T::Undefined),
-//             (T::Undefined, t) | (t, T::Undefined) => Some(t),
-//             (a, b) if a == b => Some(a),
-//             _ => None,
-//         }
-//     }
-// }

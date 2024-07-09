@@ -1,6 +1,6 @@
 use nes_types::NesType;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Field {
     name: String,
     projected_name: Option<String>,

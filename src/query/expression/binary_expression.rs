@@ -1,4 +1,5 @@
 use nes_types::NesType;
+use strum_macros::EnumIter;
 
 use super::expression::RawExpr;
 
@@ -16,7 +17,7 @@ impl BinaryExpr {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum BinaryOp {
     // Arithmetic
     And,

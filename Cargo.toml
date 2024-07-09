@@ -13,6 +13,9 @@ serde_json = "1.0.117"
 tokio = {version="1.37.0", features = ["macros", "rt-multi-thread"]}
 nes-types = {path="../nes-types"}
 log = "0.4.22"
+rand = "0.8.5"
+strum = "0.26.3"
+strum_macros = "0.26.4"
 # tonic = "0.11.0"
 
 [build-dependencies]

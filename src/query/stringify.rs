@@ -109,7 +109,7 @@ fn stringify_binary_expr(expr: &BinaryExpr) -> String {
         BinaryOp::Divide => "/",
     };
     format!(
-        "{} {op} {}",
+        "({} {op} {})",
         stringify_expr(&expr.lhs),
         stringify_expr(&expr.rhs)
     )
