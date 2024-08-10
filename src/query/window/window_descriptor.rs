@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use crate::query::time::{Duration, TimeCharacteristic};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize) ]
 pub enum WindowDescriptor {
     TumblingWindow {
         duration: Duration,

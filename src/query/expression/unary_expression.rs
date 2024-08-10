@@ -1,8 +1,9 @@
 use nes_types::NesType;
+use serde::{Deserialize, Serialize};
 
 use super::expression::RawExpr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct UnaryExpr {
     pub expr: Box<RawExpr>,
     pub operator: UnaryOp,
@@ -15,7 +16,7 @@ impl UnaryExpr {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum UnaryOp {
     Negate,
 }

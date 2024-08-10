@@ -13,7 +13,9 @@ async fn main() {
                 .unwrap(),
         )
         .sink(Sink::Print);
-    let response = runtime.execute_query(&query, PlacementStrategy::BottomUp).await;
+    let response = runtime
+        .execute_query(&query, PlacementStrategy::BottomUp)
+        .await;
     match response {
         Ok(query_id) => log::info!("Started Execution of query with id: {query_id}"),
         Err(err) => log::error!("Failed to execute query: {:?}", err),

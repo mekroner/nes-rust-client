@@ -1,6 +1,7 @@
 use nes_types::NesType;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Field {
     name: String,
     projected_name: Option<String>,

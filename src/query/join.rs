@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use super::{
     expression::Field, operator::Operator, window::window_descriptor::WindowDescriptor,
     QueryBuilder,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Join {
     pub lhs: Field,
     pub rhs: Field,

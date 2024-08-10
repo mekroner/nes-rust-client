@@ -1,9 +1,10 @@
 use nes_types::NesType;
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 use super::expression::RawExpr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct BinaryExpr {
     pub lhs: Box<RawExpr>,
     pub rhs: Box<RawExpr>,
@@ -17,11 +18,12 @@ impl BinaryExpr {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Serialize, Deserialize)]
 pub enum BinaryOp {
-    // Arithmetic
+    // Logical
     And,
     Or,
+    // Relations
     Equals,
     Greater,
     GreaterEquals,
@@ -32,6 +34,12 @@ pub enum BinaryOp {
     Sub,
     Multiply,
     Divide,
+}
+
+pub enum BinaryOpType {
+    Logical,
+    Relational,
+    Arithmetic,
 }
 
 impl BinaryOp {

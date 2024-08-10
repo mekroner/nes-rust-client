@@ -2,6 +2,8 @@ use crate::query::stringify::stringify_query;
 use crate::query::{Query, QueryBuilder};
 use crate::serialization::protobuf::serialize_query::serialize_request;
 
+use super::query_state::QueryState;
+
 pub enum PlacementStrategy {
     BottomUp,
 }
@@ -18,7 +20,7 @@ impl ToString for PlacementStrategy {
 #[derive(Debug)]
 pub struct QueryCatalogEntry {
     pub query_id: i64,
-    pub query_status: String,
+    pub query_status: QueryState,
     pub query_string: String,
 }
 
@@ -42,18 +44,25 @@ impl NebulaStreamRuntime {
         Self { config }
     }
 
-    // FIXME: This should return false if reqwest cannot connect to coord
-    pub async fn check_connection(&self) -> Result<bool, reqwest::Error> {
+    /// This function returns true if runtime is connected and false if not.
+    pub async fn check_connection(&self) -> bool {
         log::debug!("Checking connection.");
-        let response = reqwest::get(self.coordinator_url("/v1/nes/connectivity/check")).await?;
-        log::trace!("Response status: {}", response.status());
-        let body = response.text().await?;
-        log::trace!("Response body: {}", body);
-        let json_value: serde_json::Value = serde_json::from_str(&body).unwrap();
-        let Some(serde_json::Value::Bool(is_connected)) = json_value.get("success") else {
-            panic!("Expected body to contain success field")
+        let Ok(response) = reqwest::get(self.coordinator_url("/v1/nes/connectivity/check")).await
+        else {
+            return false;
         };
-        Ok(*is_connected)
+        log::trace!("Response status: {}", response.status());
+        let Ok(body) = response.text().await else {
+            return false;
+        };
+        log::trace!("Response body: {}", body);
+        let Ok(json_value) = serde_json::from_str::<serde_json::Value>(&body) else {
+            return false;
+        };
+        let Some(serde_json::Value::Bool(is_connected)) = json_value.get("success") else {
+            return false;
+        };
+        *is_connected
     }
 
     pub fn from_source(&self, source_name: impl Into<String>) -> QueryBuilder {
@@ -107,15 +116,20 @@ impl NebulaStreamRuntime {
             let Some(query_id) = number.as_i64() else {
                 panic!("Expected query ID to be i64!");
             };
-            let Some(serde_json::Value::String(query_status)) = val.get("queryStatus") else {
+            let Some(serde_json::Value::String(status_string)) = val.get("queryStatus") else {
                 panic!("The response by the coordinator did not contain field queryStatus")
             };
             let Some(serde_json::Value::String(query_string)) = val.get("queryString") else {
                 panic!("The response by the coordinator did not contain field queryString")
             };
+
+            let query_status = match status_string.try_into() {
+                Ok(ok) => ok,
+                Err(err) => panic!("{err}"),
+            };
             let entry = QueryCatalogEntry {
                 query_id,
-                query_status: query_status.to_string(),
+                query_status,
                 query_string: query_string.to_string(),
             };
             queries.push(entry);
@@ -125,9 +139,9 @@ impl NebulaStreamRuntime {
 
     /// Returns the status of a query given the queries id. If the query is not registeded with the
     /// coordinator return None.
-    pub async fn query_status(&self, query_id: i64) -> Result<Option<String>, reqwest::Error> {
-        let queries = self.registered_queries().await?;
+    pub async fn query_status(&self, query_id: i64) -> Result<Option<QueryState>, reqwest::Error> {
         log::debug!("Extracting status of query with id {query_id}.");
+        let queries = self.registered_queries().await?;
         let Some(entry) = queries.iter().find(|e| e.query_id == query_id) else {
             return Ok(None);
         };

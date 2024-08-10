@@ -1,18 +1,27 @@
 use std::fmt::Display;
 
+use serde::{Deserialize, Serialize};
+
 use super::{
-    expression::LogicalExpr,
+    expression::{ArithmeticExpr, LogicalExpr},
     join::Join,
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Filter {
     pub expression: LogicalExpr,
     pub child: Option<Box<Operator>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Map {
+    pub assigned_field: String,
+    pub expression: ArithmeticExpr,
+    pub child: Option<Box<Operator>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Window {
     pub descriptor: WindowDescriptor,
     pub aggregations: Vec<Aggregation>,
@@ -20,16 +29,17 @@ pub struct Window {
     pub child: Option<Box<Operator>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Union {
     pub operators: Box<Operator>,
     pub child: Option<Box<Operator>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Operator {
     LogicalSource { source_name: String },
     Filter(Filter),
+    Map(Map),
     Window(Window),
     Join(Join),
     Union(Union),
@@ -40,6 +50,7 @@ impl Operator {
         match self {
             Operator::LogicalSource { .. } => None,
             Operator::Filter(Filter { child, .. }) => child.as_deref(),
+            Operator::Map(Map { child, .. }) => child.as_deref(),
             Operator::Window(Window { child, .. }) => child.as_deref(),
             Operator::Join(Join { child, .. }) => child.as_deref(),
             Operator::Union(Union {child, ..}) => child.as_deref(),
@@ -62,6 +73,7 @@ impl Display for Operator {
         match self {
             Operator::LogicalSource { source_name } => write!(f, "LogicalSource({source_name})"),
             Operator::Filter(_) => write!(f, "Filter(TODO!!!)"),
+            Operator::Map(_) => write!(f, "Map(TODO!!!)"),
             Operator::Window(_) => write!(f, "Window(TODO!!!)"),
             Operator::Join(_) => write!(f, "Join(TODO!!!)"),
             Operator::Union(_) => write!(f, "Union(TODO!!!)"),

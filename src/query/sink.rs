@@ -1,6 +1,8 @@
-use std::fmt::Display;
+use std::{fmt::Display, path::Path};
 
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Sink {
     NullOutput,
     Print,
@@ -17,11 +19,11 @@ impl Display for Sink {
         let sink_name = match self {
             Sink::NullOutput => "Null",
             Sink::Print => "Print",
-            Sink::File {..} => "File(TODO!!!)",
+            Sink::File { .. } => "File(TODO!!!)",
         };
         write!(f, "{}", sink_name)
     }
-} 
+}
 
 impl Sink {
     // Constructors
@@ -34,11 +36,33 @@ impl Sink {
         Sink::Print
     }
 
-    pub fn csv_file(path: impl Into<String>, append: bool) -> Self {
+    pub fn csv_file<P: AsRef<Path>>(path: P, append: bool) -> Self {
         Sink::File {
-            path: path.into(),
+            path: path.as_ref().to_string_lossy().into_owned(),
             format: "CSV_FORMAT".to_string(),
             append,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::Sink;
+
+    #[test]
+    fn test_csv_file_sink() {
+        let string_path = "result.log".to_string();
+        let path = PathBuf::from("result.log");
+        let sink0 = Sink::csv_file(string_path, true);
+        let sink1 = Sink::csv_file(path, true);
+        let expected_sink = Sink::File {
+            path: "result.log".to_string(),
+            format: "CSV_FORMAT".to_string(),
+            append: true,
+        };
+        assert_eq!(expected_sink, sink0);
+        assert_eq!(expected_sink, sink1);
     }
 }

@@ -10,9 +10,9 @@ extern crate nes_rust_client as nes_rs;
 async fn main() {
     let runtime = NebulaStreamRuntime::new("localhost".to_string(), 8081);
 
-    let query0 = QueryBuilder::from_source("wind_turbines");
-    let query1 = QueryBuilder::from_source("wind_turbines")
-        .join_with(query0)
+    let query_to_join = QueryBuilder::from_source("wind_turbines");
+    let query = QueryBuilder::from_source("wind_turbines")
+        .join_with(query_to_join)
         .where_field("id")
         .equals("turbine_id")
         .window(WindowDescriptor::TumblingWindow {
@@ -23,7 +23,12 @@ async fn main() {
             },
         })
         .sink(Sink::Print);
-    let result = runtime.execute_query(query1, "BottomUp".to_string()).await;
-    dbg!(result);
+    let response = runtime
+        .execute_query(&query, PlacementStrategy::BottomUp)
+        .await;
+    match response {
+        Ok(query_id) => log::info!("Started Execution of query with id: {query_id}"),
+        Err(err) => log::error!("Failed to execute query: {:?}", err),
+    }
     //TODO
 }

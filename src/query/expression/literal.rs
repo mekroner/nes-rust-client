@@ -1,6 +1,7 @@
 use nes_types::NesType;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Literal {
     value: String,
     data_type: NesType,

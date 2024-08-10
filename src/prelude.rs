@@ -1,5 +1,7 @@
 pub use crate::runtime::nebula_stream_runtime::NebulaStreamRuntime;
 pub use crate::runtime::nebula_stream_runtime::PlacementStrategy;
+pub use crate::runtime::query_state::QueryState;
+pub use crate::runtime::query_state::QueryStateParseError;
 pub use crate::query::QueryBuilder;
 pub use crate::query::Query;
 pub use crate::query::sink::Sink;

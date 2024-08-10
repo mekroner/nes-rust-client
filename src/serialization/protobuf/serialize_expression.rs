@@ -5,9 +5,9 @@ use super::{
         serializable_data_value::BasicValue,
         serializable_expression::{
             AddExpression, AndExpression, ConstantValueExpression, DivExpression, EqualsExpression,
-            FieldAccessExpression, GreaterEqualsExpression, GreaterExpression,
-            LessEqualsExpression, LessExpression, MulExpression, NegateExpression, OrExpression,
-            SubExpression,
+            FieldAccessExpression, FieldAssignmentExpression, GreaterEqualsExpression,
+            GreaterExpression, LessEqualsExpression, LessExpression, MulExpression,
+            NegateExpression, OrExpression, SubExpression,
         },
         SerializableDataValue, SerializableExpression,
     },
@@ -45,6 +45,16 @@ pub fn serialize_expression(expr: &RawExpr) -> SerializableExpression {
     }
 }
 
+pub fn serialize_field_assignment(field: &Field, expr: &RawExpr) -> SerializableExpression {
+    let data_type = serialize_data_type(field.data_type());
+    let details = field_assignment_details(field, expr);
+    SerializableExpression {
+        details: Some(details),
+        children: vec![],
+        stamp: Some(data_type),
+    }
+}
+
 pub fn serialize_field(field: &Field) -> SerializableExpression {
     let data_type = serialize_data_type(field.data_type());
     let details = field_details(field);
@@ -65,6 +75,18 @@ fn literal_details(literal: &Literal) -> prost_types::Any {
     };
     let expr = ConstantValueExpression {
         value: Some(data_value),
+    };
+    Any::from_msg(&expr).unwrap()
+}
+
+fn field_assignment_details(field: &Field, raw_expr: &RawExpr) -> prost_types::Any {
+    let field_access = FieldAccessExpression {
+        field_name: field.name().to_string(),
+        r#type: Some(serialize_data_type(field.data_type())),
+    };
+    let expr = FieldAssignmentExpression {
+        field: Some(field_access),
+        assignment: Some(serialize_expression(raw_expr)),
     };
     Any::from_msg(&expr).unwrap()
 }

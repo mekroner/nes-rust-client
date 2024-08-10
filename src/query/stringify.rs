@@ -8,7 +8,7 @@ use super::{
         Field,
     },
     join::Join,
-    operator::{Filter, Operator, Union, Window},
+    operator::{Filter, Map, Operator, Union, Window},
     sink::Sink,
     Query,
 };
@@ -31,6 +31,7 @@ fn stringify_operator(operator: Option<&Operator>) -> String {
     match operator {
         Some(O::LogicalSource { source_name }) => format!("logical_source(\"{source_name}\")"),
         Some(O::Filter(filter)) => stringify_filter_operator(filter),
+        Some(O::Map(map)) => stringify_map_operator(map),
         Some(O::Window(window)) => stringify_window_operator(window),
         Some(O::Join(join)) => stringify_join_operator(join),
         Some(O::Union(union)) => stringify_union_operator(union),
@@ -43,6 +44,15 @@ fn stringify_filter_operator(filter: &Filter) -> String {
         "{}.filter({})",
         stringify_operator(filter.child.as_deref()),
         stringify_expr(&filter.expression.0)
+    )
+}
+
+fn stringify_map_operator(map: &Map) -> String {
+    format!(
+        "{}.map({}, {})",
+        stringify_operator(map.child.as_deref()),
+        map.assigned_field,
+        stringify_expr(&map.expression.0)
     )
 }
 

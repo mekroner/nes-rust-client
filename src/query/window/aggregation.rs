@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use crate::query::expression::Field;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum AggregationType {
     Sum,
     Average,
@@ -10,7 +12,7 @@ pub enum AggregationType {
     Count,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Aggregation {
     field: Option<Field>,
     projected_field: Option<Field>,

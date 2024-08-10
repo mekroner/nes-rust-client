@@ -9,7 +9,10 @@ async fn main() {
     let query1 = QueryBuilder::from_source("wind_turbines")
         .union(query0)
         .sink(Sink::Print);
-    let result = runtime.execute_query(query1, "BottomUp".to_string()).await;
-    dbg!(result);
+    let response = runtime.execute_query(&query1, PlacementStrategy::BottomUp).await;
+    match response {
+        Ok(query_id) => log::info!("Started Execution of query with id: {query_id}"),
+        Err(err) => log::error!("Failed to execute query: {:?}", err),
+    }
     //TODO
 }

@@ -1,28 +1,26 @@
 use std::collections::HashMap;
 
 use crate::query::{
-    join::Join,
-    operator::{Filter, Operator, Window},
+    expression::Field, join::Join, operator::{Filter, Map, Operator, Window}
 };
 use prost_types::Any;
 
 use super::{
     nes::{
         serializable_operator::{
-            source_details::SerializableLogicalSourceDescriptor, FilterDetails, JoinDetails,
-            SourceDetails, UnionDetails, WindowDetails,
+            source_details::SerializableLogicalSourceDescriptor, FilterDetails, JoinDetails, MapDetails, SourceDetails, UnionDetails, WindowDetails
         },
         SerializableOperator,
     },
-    serialize_expression::{serialize_expression, serialize_field},
+    serialize_expression::{serialize_expression, serialize_field, serialize_field_assignment},
     serialize_window::{
         serialize_aggregations, serialize_window_descriptor, serialize_window_keys,
     },
 };
 
-pub fn serialize_operator(operators: &Operator) -> u64 {
-    todo!();
-}
+// pub fn serialize_operator(operators: &Operator) -> u64 {
+//     todo!();
+// }
 
 pub fn traverse_operators(
     operator: Option<&Operator>,
@@ -69,6 +67,7 @@ fn serialize_operator_details(operator: &Operator) -> prost_types::Any {
             Any::from_msg(&logical_source_details(source_name))
         }
         Operator::Filter(filter) => Any::from_msg(&filter_details(filter)),
+        Operator::Map(map) => Any::from_msg(&map_details(map)),
         Operator::Window(window) => Any::from_msg(&window_details(window)),
         Operator::Join(join) => Any::from_msg(&join_details(join)),
         Operator::Union(_) => Any::from_msg(&UnionDetails {}),
@@ -93,6 +92,16 @@ fn filter_details(filter: &Filter) -> FilterDetails {
         predicate: Some(serialize_expression(&filter.expression.0)),
         ..Default::default()
     }
+}
+
+fn map_details(map: &Map) -> MapDetails {
+    // wrap it in field assignment expr
+    let field = Field::untyped(&map.assigned_field);
+    let expr = serialize_field_assignment(&field, &map.expression.0);
+    MapDetails {
+        expression: Some(expr),
+    }
+    // looking good!
 }
 
 fn window_details(window: &Window) -> WindowDetails {
@@ -162,8 +171,7 @@ impl SerializableOperatorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use super::serialize_operator;
-    use crate::prelude::{ExprBuilder as EB, *};
+    use crate::{prelude::{ExprBuilder as EB, *}, serialization::protobuf::serialize_operator::traverse_operators};
     use std::collections::HashMap;
 
     #[test]
@@ -191,7 +199,7 @@ mod tests {
             });
         let mut id = 0;
         let mut operator_map = HashMap::new();
-        serialize_operator(query.operator(), &mut id, &mut operator_map);
+        traverse_operators(Some(query.operator()), &mut id, &mut operator_map);
         assert_eq!(5, id);
         assert_eq!(6, id);
         // assert!(operator_map[0]., )

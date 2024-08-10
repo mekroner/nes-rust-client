@@ -1,9 +1,11 @@
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum TimeCharacteristic {
     EventTime { field_name: String, unit: TimeUnit },
 }
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub enum TimeUnit {
     #[default]
     Milliseconds,
@@ -36,7 +38,7 @@ impl TimeUnit {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Duration {
     pub amount: u32,
     pub unit: TimeUnit,

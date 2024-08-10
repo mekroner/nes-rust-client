@@ -1,19 +1,24 @@
-use std::fmt::Display;
+use serde::{Deserialize, Serialize};
 
 use super::{
-    expression::LogicalExpr,
+    expression::{ArithmeticExpr, LogicalExpr},
     join::JoinWhereBuilder,
-    operator::{Filter, Operator, OperatorIterator, Union, Window},
+    operator::{Filter, Map, Operator, OperatorIterator, Union, Window},
     sink::Sink,
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
 
-#[derive(Debug)]
+/// A `Query` object is user code API to specify a NES query. Queries are used to manipulate stream
+/// contents. To create a query use the `QueryBuilder` API.
+/// A `Query` consists of a tree of `Operators` and a single `Sink`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Query {
     pub(super) operator: Operator,
     pub(super) sink: Sink,
 }
 
+/// The `QueryBuilder` is used to create `Query` objects.
+#[derive(Debug, Clone)]
 pub struct WindowedQueryBuilder {
     query_builder: QueryBuilder,
     key_fields: Option<Vec<String>>,
@@ -43,6 +48,7 @@ impl WindowedQueryBuilder {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct QueryBuilder {
     operator: Operator,
 }
@@ -58,6 +64,10 @@ impl Query {
 
     pub fn sink(&self) -> &Sink {
         &self.sink
+    }
+
+    pub fn from_source(source_name: impl Into<String>) -> QueryBuilder {
+        QueryBuilder::from_source(source_name)
     }
 }
 
@@ -84,6 +94,19 @@ impl QueryBuilder {
         });
         self
     }
+    
+    // FIXME: This should also support LogicalExpr
+    /// Add a `Map` `Operator` to the operator tree. The `Map` `Operator` maps the result of a 
+    /// computed expression to a new or existing field in the Stream.
+    pub fn map(mut self, assigned_field: impl Into<String>, expression: ArithmeticExpr) -> Self {
+        let child_operator = self.operator;
+        self.operator = Operator::Map(Map {
+            child: Some(Box::new(child_operator)),
+            assigned_field: assigned_field.into(),
+            expression,
+        });
+        self
+    }
 
     pub fn window(self, descriptor: WindowDescriptor) -> WindowedQueryBuilder {
         WindowedQueryBuilder {
@@ -97,9 +120,6 @@ impl QueryBuilder {
         unimplemented!();
     }
 
-    pub fn map(self) -> Self {
-        unimplemented!();
-    }
 
     pub fn join_with(self, query: Self) -> JoinWhereBuilder {
         unimplemented!();

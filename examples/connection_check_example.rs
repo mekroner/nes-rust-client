@@ -3,10 +3,9 @@ use nes_rs::prelude::*;
 
 #[tokio::main]
 async fn main(){
-    let runtime = NebulaStreamRuntime::new("localhost".to_string(), 8081);
-    let response = runtime.check_connection().await;
-    if let Err(err) = response {
-        println!("{}", err);
-    }
-    // println!("Response: {}", response);
+    simple_logger::init_with_level(log::Level::Trace).expect("Simple_logger should not fail!");
+    log::info!("This example shows the is_connected function.");
+    let runtime = NebulaStreamRuntime::new("localhost", 8081);
+    let is_connected = runtime.check_connection().await;
+    log::info!("NebulaStream is connected: {is_connected}");
 }
