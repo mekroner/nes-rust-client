@@ -27,7 +27,7 @@ impl Into<Literal> for i32 {
     fn into(self) -> Literal {
         Literal {
             value: self.to_string(),
-            data_type: NesType::Int32,
+            data_type: NesType::Int(nes_types::IntType::Signed32),
         }
     }
 }
@@ -36,7 +36,7 @@ impl Into<Literal> for i64 {
     fn into(self) -> Literal {
         Literal {
             value: self.to_string(),
-            data_type: NesType::Int64,
+            data_type: NesType::Int(nes_types::IntType::Signed64),
         }
     }
 }

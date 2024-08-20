@@ -1,29 +1,23 @@
 use prost_types::Any;
 
-use nes_types::NesType;
 use super::nes::{
     serializable_data_type::{FloatDetails, IntegerDetails, Type},
     SerializableDataType,
 };
+use nes_types::{FloatType, IntType, NesType};
 
 pub fn serialize_data_type(data_type: NesType) -> SerializableDataType {
     let (serial_type, details) = match data_type {
         NesType::Undefined => (Type::Undefined, None),
         NesType::Char => (Type::Char, None),
         NesType::Bool => (Type::Boolean, None),
-        NesType::Int32 => (
+        NesType::Int(t) => (
             Type::Integer,
-            Some(Any::from_msg(&int32_details()).unwrap()),
+            Some(Any::from_msg(&int_detail_helper(t)).unwrap()),
         ),
-        NesType::Int64 => (
-            Type::Integer,
-            Some(Any::from_msg(&int64_details()).unwrap()),
-        ),
-        NesType::Float32 => (Type::Float, 
-            Some(Any::from_msg(&float32_details()).unwrap()),
-        ),
-        NesType::Float64 => (Type::Float, 
-            Some(Any::from_msg(&float64_details()).unwrap()),
+        NesType::Float(t) => (
+            Type::Float,
+            Some(Any::from_msg(&float_detail_helper(t)).unwrap()),
         ),
     };
     SerializableDataType {
@@ -32,34 +26,42 @@ pub fn serialize_data_type(data_type: NesType) -> SerializableDataType {
     }
 }
 
-const fn int32_details() -> IntegerDetails {
-    IntegerDetails {
-        bits: 32,
-        upper_bound: i32::MAX as i64,
-        lower_bound: i32::MIN as i64,
+macro_rules! int_details {
+    ($type:ty) => {
+        IntegerDetails {
+            bits: (std::mem::size_of::<$type>() * 8) as u64,
+            upper_bound: <$type>::MAX as i64,
+            lower_bound: <$type>::MIN as i64,
+        }
+    };
+}
+
+const fn int_detail_helper(int_type: IntType) -> IntegerDetails {
+    match int_type {
+        IntType::Signed8 => int_details!(i8),
+        IntType::Unsigned8 => int_details!(u8),
+        IntType::Signed16 => int_details!(i16),
+        IntType::Unsigned16 => int_details!(u16),
+        IntType::Signed32 => int_details!(i32),
+        IntType::Unsigned32 => int_details!(u32),
+        IntType::Signed64 => int_details!(i64),
+        IntType::Unsigned64 => int_details!(u64),
     }
 }
 
-const fn int64_details() -> IntegerDetails {
-    IntegerDetails {
-        bits: 64,
-        upper_bound: i64::MAX,
-        lower_bound: i64::MIN,
-    }
+macro_rules! float_details {
+    ($type:ty) => {
+        FloatDetails {
+            bits: (std::mem::size_of::<$type>() * 8) as u64,
+            upper_bound: <$type>::MAX as f64,
+            lower_bound: <$type>::MIN as f64,
+        }
+    };
 }
 
-const fn float32_details() -> FloatDetails {
-    FloatDetails {
-        bits: 32,
-        upper_bound: f32::MAX as f64,
-        lower_bound: f32::MIN as f64,
-    }
-}
-
-const fn float64_details() -> FloatDetails {
-    FloatDetails {
-        bits: 64,
-        upper_bound: f64::MAX,
-        lower_bound: f64::MIN,
+const fn float_detail_helper(float_type: FloatType) -> FloatDetails {
+    match float_type {
+        FloatType::Bit32 => float_details!(f32),
+        FloatType::Bit64 => float_details!(u64),
     }
 }

@@ -88,9 +88,7 @@ impl ExprBuilder {
             return Err(err);
         }
         match self.expr.data_type() {
-            NesType::Float32 | NesType::Float64 | NesType::Int64 | NesType::Int32 => {
-                Ok(ArithmeticExpr(self.expr))
-            }
+            NesType::Float(_) | NesType::Int(_) => Ok(ArithmeticExpr(self.expr)),
             _ => Err(ExprBuildError {}),
         }
     }
@@ -108,14 +106,14 @@ impl ExprBuilder {
 
 #[cfg(test)]
 mod expression_builder_test {
+    use crate::expression::binary_expression::BinaryExpr;
+    use crate::expression::binary_expression::BinaryOp;
+    use crate::expression::expression::RawExpr as RE;
+    use crate::expression::field::Field;
+    use crate::expression::unary_expression::{UnaryExpr, UnaryOp};
+    use crate::expression::ArithmeticExpr;
+    use crate::expression::{ExprBuilder as EB, LogicalExpr};
     use nes_types::NesType;
-    use crate::query::expression::binary_expression::BinaryExpr;
-    use crate::query::expression::binary_expression::BinaryOp;
-    use crate::query::expression::expression::RawExpr as RE;
-    use crate::query::expression::field::Field;
-    use crate::query::expression::unary_expression::{UnaryExpr, UnaryOp};
-    use crate::query::expression::ArithmeticExpr;
-    use crate::query::expression::{ExprBuilder as EB, LogicalExpr};
 
     // #[test]
     // fn field_test() {
