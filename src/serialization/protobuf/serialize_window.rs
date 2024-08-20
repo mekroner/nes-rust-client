@@ -1,5 +1,5 @@
+use crate::expression::{expression::RawExpr, field::Field};
 use crate::query::{
-    expression::{expression::RawExpr, field::Field},
     time::TimeCharacteristic,
     window::{
         aggregation::{Aggregation, AggregationType},

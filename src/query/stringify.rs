@@ -1,16 +1,17 @@
 // this is for pretty printing of queries and expressions
+
 use super::{
-    expression::{
-        binary_expression::{BinaryExpr, BinaryOp},
-        expression::RawExpr,
-        literal::Literal,
-        unary_expression::{UnaryExpr, UnaryOp},
-        Field,
-    },
     join::Join,
     operator::{Filter, Map, Operator, Union, Window},
     sink::Sink,
     Query,
+};
+use crate::expression::{
+    binary_expression::{BinaryExpr, BinaryOp},
+    expression::RawExpr,
+    literal::Literal,
+    unary_expression::{UnaryExpr, UnaryOp},
+    Field,
 };
 
 // TODO: Make stringify detail adjustable
@@ -18,6 +19,7 @@ pub enum StringifyDetail {
     Default,
 }
 
+/// Allows to pretty print a `Query`.
 pub fn stringify_query(query: &Query) -> String {
     format!(
         "{}.sink({});",

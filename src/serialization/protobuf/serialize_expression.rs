@@ -13,7 +13,7 @@ use super::{
     },
     serialize_data_type::serialize_data_type,
 };
-use crate::query::expression::{
+use crate::expression::{
     binary_expression::{BinaryExpr, BinaryOp},
     expression::RawExpr,
     field::Field,

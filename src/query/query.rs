@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::expression::{ArithmeticExpr, LogicalExpr};
 use super::{
-    expression::{ArithmeticExpr, LogicalExpr},
     join::JoinWhereBuilder,
     operator::{Filter, Map, Operator, OperatorIterator, Union, Window},
     sink::Sink,

@@ -5,14 +5,13 @@ use rand::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::{
-    prelude::ExprBuilder,
-    query::expression::{
+    expression::{
         binary_expression::{BinaryExpr, BinaryOp},
         expression::RawExpr,
         literal::Literal,
-        unary_expression::{UnaryExpr, UnaryOp},
         Field, LogicalExpr,
     },
+    prelude::ExprBuilder,
 };
 
 pub struct GenerationError(String);

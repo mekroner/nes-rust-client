@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::query::expression::Field;
+use crate::expression::Field;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum AggregationType {

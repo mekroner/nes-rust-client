@@ -3,10 +3,10 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    expression::{ArithmeticExpr, LogicalExpr},
     join::Join,
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
+use crate::expression::{ArithmeticExpr, LogicalExpr};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Filter {
@@ -53,7 +53,7 @@ impl Operator {
             Operator::Map(Map { child, .. }) => child.as_deref(),
             Operator::Window(Window { child, .. }) => child.as_deref(),
             Operator::Join(Join { child, .. }) => child.as_deref(),
-            Operator::Union(Union {child, ..}) => child.as_deref(),
+            Operator::Union(Union { child, .. }) => child.as_deref(),
         }
     }
 

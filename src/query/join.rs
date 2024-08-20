@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::expression::Field;
 use super::{
-    expression::Field, operator::Operator, window::window_descriptor::WindowDescriptor,
+     operator::Operator, window::window_descriptor::WindowDescriptor,
     QueryBuilder,
 };
 

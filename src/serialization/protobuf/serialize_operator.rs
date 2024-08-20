@@ -1,14 +1,17 @@
 use std::collections::HashMap;
 
+use crate::expression::Field;
 use crate::query::{
-    expression::Field, join::Join, operator::{Filter, Map, Operator, Window}
+    join::Join,
+    operator::{Filter, Map, Operator, Window},
 };
 use prost_types::Any;
 
 use super::{
     nes::{
         serializable_operator::{
-            source_details::SerializableLogicalSourceDescriptor, FilterDetails, JoinDetails, MapDetails, SourceDetails, UnionDetails, WindowDetails
+            source_details::SerializableLogicalSourceDescriptor, FilterDetails, JoinDetails,
+            MapDetails, SourceDetails, UnionDetails, WindowDetails,
         },
         SerializableOperator,
     },
@@ -171,7 +174,10 @@ impl SerializableOperatorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{prelude::{ExprBuilder as EB, *}, serialization::protobuf::serialize_operator::traverse_operators};
+    use crate::{
+        prelude::{ExprBuilder as EB, *},
+        serialization::protobuf::serialize_operator::traverse_operators,
+    };
     use std::collections::HashMap;
 
     #[test]
