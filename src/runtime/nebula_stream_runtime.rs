@@ -105,7 +105,9 @@ impl NebulaStreamRuntime {
         let json_value: serde_json::Value = serde_json::from_str(&body).unwrap();
         let Some(serde_json::Value::Number(number)) = json_value.get("queryId") else {
             let Some(serde_json::Value::String(message)) = json_value.get("message") else {
-                return Err(RuntimeError("The response by the coordinator did not contain a query ID.".into()));
+                return Err(RuntimeError(
+                    "The response by the coordinator did not contain a query ID.".into(),
+                ));
             };
             return Err(RuntimeError(format!("Error message: {message}.")));
         };
@@ -167,8 +169,18 @@ impl NebulaStreamRuntime {
         Ok(Some(entry.query_status.clone()))
     }
 
-    pub fn stop_query(&self, query_id: i64) -> Result<String, reqwest::Error> {
-        unimplemented!();
+    /// Returns an error if something went wrong
+    pub async fn stop_query(&self, query_id: i64) -> Result<(), reqwest::Error> {
+        log::debug!("Stopping query with id {query_id}.");
+        let client = reqwest::Client::builder().build().unwrap();
+        let response = client
+            .delete(
+                self.coordinator_url(&(format!("/v1/nes/query/stop-query?queryId={}", query_id))),
+            )
+            .send()
+            .await?;
+        log::trace!("Response status: {}", response.status());
+        Ok(())
     }
 
     pub async fn logical_sources(&self) -> Result<Vec<String>, reqwest::Error> {
@@ -194,7 +206,7 @@ impl NebulaStreamRuntime {
         Ok(source_list)
     }
 
-    fn coordinator_url(&self, end_point: &'static str) -> String {
+    fn coordinator_url<'a>(&self, end_point: &'a str) -> String {
         format!(
             "http://{}:{}{}",
             self.config.host, self.config.port, end_point
