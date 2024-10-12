@@ -7,6 +7,7 @@ use crate::query::{
 };
 use prost_types::Any;
 
+use super::nes::serializable_operator::ProjectionDetails;
 use super::{
     nes::{
         serializable_operator::{
@@ -69,6 +70,7 @@ fn serialize_operator_details(operator: &Operator) -> prost_types::Any {
         Operator::LogicalSource { source_name } => {
             Any::from_msg(&logical_source_details(source_name))
         }
+        Operator::Projection(projection) => Any::from_msg(&projection_details(projection)),
         Operator::Filter(filter) => Any::from_msg(&filter_details(filter)),
         Operator::Map(map) => Any::from_msg(&map_details(map)),
         Operator::Window(window) => Any::from_msg(&window_details(window)),
@@ -87,6 +89,16 @@ fn logical_source_details(source_name: &String) -> SourceDetails {
     SourceDetails {
         source_descriptor: Some(descriptor),
         ..Default::default()
+    }
+}
+fn projection_details(projection: &crate::query::operator::Projection) -> ProjectionDetails {
+    let mut exprs = Vec::new();
+    for field in &projection.fields {
+        let expr = serialize_field(field);
+        exprs.push(expr);
+    }
+    ProjectionDetails {
+        expression: exprs,
     }
 }
 

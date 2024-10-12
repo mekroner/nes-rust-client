@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::query::stringify::stringify_query;
 use crate::query::{Query, QueryBuilder};
 use crate::serialization::protobuf::serialize_query::serialize_request;
@@ -14,6 +16,20 @@ impl ToString for PlacementStrategy {
             PlacementStrategy::BottomUp => "BottomUp",
         }
         .to_string()
+    }
+}
+
+pub struct RuntimeError(String);
+
+impl Display for RuntimeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<reqwest::Error> for RuntimeError {
+    fn from(value: reqwest::Error) -> Self {
+        RuntimeError(format!("{value}"))
     }
 }
 
@@ -73,7 +89,7 @@ impl NebulaStreamRuntime {
         &self,
         query: &Query,
         placement: PlacementStrategy,
-    ) -> Result<i64, reqwest::Error> {
+    ) -> Result<i64, RuntimeError> {
         log::debug!("Attempting to Execute Query: {}", stringify_query(query));
         let client = reqwest::Client::builder().build().unwrap();
         let request = serialize_request(query, placement);
@@ -88,10 +104,13 @@ impl NebulaStreamRuntime {
         log::trace!("Response body: {}", body);
         let json_value: serde_json::Value = serde_json::from_str(&body).unwrap();
         let Some(serde_json::Value::Number(number)) = json_value.get("queryId") else {
-            panic!("The response by the coordinator did not contain a query ID")
+            let Some(serde_json::Value::String(message)) = json_value.get("message") else {
+                return Err(RuntimeError("The response by the coordinator did not contain a query ID.".into()));
+            };
+            return Err(RuntimeError(format!("Error message: {message}.")));
         };
         let Some(query_id) = number.as_i64() else {
-            panic!("Expected query ID to be i64!");
+            return Err(RuntimeError("Expected query_id to be i64".into()));
         };
         Ok(query_id)
     }

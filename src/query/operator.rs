@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use crate::expression::field::Field;
 
 use serde::{Deserialize, Serialize};
 
@@ -36,8 +37,15 @@ pub struct Union {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Projection {
+    pub fields: Vec<Field>,
+    pub child: Option<Box<Operator>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Operator {
     LogicalSource { source_name: String },
+    Projection(Projection),
     Filter(Filter),
     Map(Map),
     Window(Window),
@@ -49,6 +57,7 @@ impl Operator {
     pub fn child(&self) -> Option<&Operator> {
         match self {
             Operator::LogicalSource { .. } => None,
+            Operator::Projection(Projection{child, ..}) => child.as_deref(),
             Operator::Filter(Filter { child, .. }) => child.as_deref(),
             Operator::Map(Map { child, .. }) => child.as_deref(),
             Operator::Window(Window { child, .. }) => child.as_deref(),
@@ -72,6 +81,7 @@ impl Display for Operator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Operator::LogicalSource { source_name } => write!(f, "LogicalSource({source_name})"),
+            Operator::Projection(_) => write!(f, "Project(TODO!!!)"),
             Operator::Filter(_) => write!(f, "Filter(TODO!!!)"),
             Operator::Map(_) => write!(f, "Map(TODO!!!)"),
             Operator::Window(_) => write!(f, "Window(TODO!!!)"),

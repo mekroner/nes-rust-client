@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::expression::{ArithmeticExpr, LogicalExpr};
 use super::{
     join::JoinWhereBuilder,
-    operator::{Filter, Map, Operator, OperatorIterator, Union, Window},
+    operator::{Filter, Map, Operator, OperatorIterator, Projection, Union, Window},
     sink::Sink,
     window::{aggregation::Aggregation, window_descriptor::WindowDescriptor},
 };
+use crate::expression::{ArithmeticExpr, Field, LogicalExpr};
 
 /// A `Query` object is user code API to specify a NES query. Queries are used to manipulate stream
 /// contents. To create a query use the `QueryBuilder` API.
@@ -66,6 +66,10 @@ impl Query {
         &self.sink
     }
 
+    pub fn set_sink(&mut self, sink: Sink) {
+        self.sink = sink;
+    }
+
     pub fn from_source(source_name: impl Into<String>) -> QueryBuilder {
         QueryBuilder::from_source(source_name)
     }
@@ -94,9 +98,9 @@ impl QueryBuilder {
         });
         self
     }
-    
+
     // FIXME: This should also support LogicalExpr
-    /// Add a `Map` `Operator` to the operator tree. The `Map` `Operator` maps the result of a 
+    /// Add a `Map` `Operator` to the operator tree. The `Map` `Operator` maps the result of a
     /// computed expression to a new or existing field in the Stream.
     pub fn map(mut self, assigned_field: impl Into<String>, expression: ArithmeticExpr) -> Self {
         let child_operator = self.operator;
@@ -116,10 +120,14 @@ impl QueryBuilder {
         }
     }
 
-    pub fn project(self) -> Self {
-        unimplemented!();
+    pub fn project(mut self, fields: impl IntoIterator<Item = Field>) -> Self {
+        let child_operator = self.operator;
+        self.operator = Operator::Projection(Projection {
+            fields: fields.into_iter().collect(),
+            child: Some(Box::new(child_operator)),
+        });
+        self
     }
-
 
     pub fn join_with(self, query: Self) -> JoinWhereBuilder {
         unimplemented!();

@@ -25,7 +25,6 @@ impl Display for ExprBuildError {
 impl Error for ExprBuildError {}
 
 /// The primary way to construct LogicalExpr, ArithmeticExpr, and FieldExpr.
-///
 pub struct ExprBuilder {
     expr: RawExpr,
     error: Option<ExprBuildError>,
@@ -80,7 +79,26 @@ impl ExprBuilder {
     cmp_operator!(less_than, BinaryOp::Less);
     cmp_operator!(less_equals, BinaryOp::LessEquals);
 
-    // arith
+    // binary arith
+    pub fn div(mut self, other: Self) -> Self {
+        let data_type =
+            match nes_types::NesType::try_resolve(self.expr.data_type(), other.expr.data_type()) {
+                Some(nes_types::NesType::Int(t)) => nes_types::NesType::Int(t),
+                Some(nes_types::NesType::Float(t)) => nes_types::NesType::Float(t),
+                Some(nes_types::NesType::Undefined) => nes_types::NesType::Undefined,
+                _ => {
+                    self.error = Some(ExprBuildError {});
+                    nes_types::NesType::Undefined
+                }
+            };
+        self.expr = RawExpr::Binary(BinaryExpr {
+            lhs: Box::new(self.expr),
+            rhs: Box::new(other.expr),
+            operator: BinaryOp::Divide,
+            data_type,
+        });
+        self
+    }
 
     // builder
     pub fn build_arith(self) -> Result<ArithmeticExpr, ExprBuildError> {
@@ -88,7 +106,7 @@ impl ExprBuilder {
             return Err(err);
         }
         match self.expr.data_type() {
-            NesType::Float(_) | NesType::Int(_) => Ok(ArithmeticExpr(self.expr)),
+            NesType::Float(_) | NesType::Int(_) | NesType::Undefined => Ok(ArithmeticExpr(self.expr)),
             _ => Err(ExprBuildError {}),
         }
     }
