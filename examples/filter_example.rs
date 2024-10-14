@@ -18,6 +18,6 @@ async fn main() {
         .await;
     match response {
         Ok(query_id) => log::info!("Started Execution of query with id: {query_id}"),
-        Err(err) => log::error!("Failed to execute query: {:?}", err),
+        Err(err) => log::error!("Failed to execute query: {}", err),
     }
 }

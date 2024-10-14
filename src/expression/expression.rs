@@ -82,6 +82,29 @@ impl RawExpr {
         vec
     }
 
+    /// The function gets a `condition` that is evaluated on every element of the expression tree.
+    /// If one element fulfills this condition the funtion returns true else it return false.
+    pub fn traverse_and_check(&self, condition: fn(&Self) -> bool) -> bool {
+        if condition(self) {
+            return true;
+        }
+        match self {
+            RawExpr::Unary(UnaryExpr { expr, .. }) => {
+                if expr.traverse_and_check(condition) {
+                    return true;
+                }
+            }
+            RawExpr::Binary(BinaryExpr { lhs, rhs, .. }) => {
+                if lhs.traverse_and_check(condition) || rhs.traverse_and_check(condition) {
+                    return true;
+                }
+            }
+            _ => (),
+        }
+
+        false
+    }
+
     fn leafs_parents_recursive(&self, vec: &mut Vec<RawExpr>) {
         match self {
             RawExpr::Unary(UnaryExpr { expr, .. }) => {
@@ -97,7 +120,7 @@ impl RawExpr {
                 lhs.leafs_parents_recursive(vec);
                 rhs.leafs_parents_recursive(vec);
             }
-            _ => ()
+            _ => (),
         }
     }
 
@@ -138,9 +161,12 @@ mod test {
 
     use nes_types::NesType;
 
-    use crate::query::{
-        expression::{binary_expression::BinaryOp, Field},
-        stringify::stringify_expr,
+    use crate::{
+        expression::{
+            binary_expression::{BinaryExpr, BinaryOp},
+            Field,
+        },
+        query::stringify::stringify_expr,
     };
 
     use super::RawExpr;
@@ -206,5 +232,31 @@ mod test {
         vec_eq(&expected1, &exprs[1].leaf_parents());
         vec_eq(&expected2, &exprs[2].leaf_parents());
         vec_eq(&expected3, &exprs[3].leaf_parents());
+    }
+
+    #[test]
+    fn test_traverse_and_check() {
+        let (_, exprs) = common_values();
+        fn is_and_operator(expr: &RawExpr) -> bool {
+            if let RawExpr::Binary(BinaryExpr { operator, .. }) = expr {
+                return *operator == BinaryOp::And;
+            }
+            false
+        }
+        assert!(exprs[0].traverse_and_check(is_and_operator));
+        assert!(!exprs[1].traverse_and_check(is_and_operator));
+        assert!(exprs[2].traverse_and_check(is_and_operator));
+        assert!(exprs[3].traverse_and_check(is_and_operator));
+
+        fn is_or_operator(expr: &RawExpr) -> bool {
+            if let RawExpr::Binary(BinaryExpr { operator, .. }) = expr {
+                return *operator == BinaryOp::Or;
+            }
+            false
+        }
+        assert!(!exprs[0].traverse_and_check(is_or_operator)); 
+        assert!(exprs[1].traverse_and_check(is_or_operator)); 
+        assert!(exprs[2].traverse_and_check(is_or_operator));
+        assert!(!exprs[3].traverse_and_check(is_or_operator));
     }
 }

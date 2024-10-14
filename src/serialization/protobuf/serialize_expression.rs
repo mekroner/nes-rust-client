@@ -4,10 +4,7 @@ use super::{
     nes::{
         serializable_data_value::BasicValue,
         serializable_expression::{
-            AddExpression, AndExpression, ConstantValueExpression, DivExpression, EqualsExpression,
-            FieldAccessExpression, FieldAssignmentExpression, GreaterEqualsExpression,
-            GreaterExpression, LessEqualsExpression, LessExpression, MulExpression,
-            NegateExpression, OrExpression, SubExpression,
+            AbsExpression, AddExpression, AndExpression, ConstantValueExpression, DivExpression, EqualsExpression, FieldAccessExpression, FieldAssignmentExpression, GreaterEqualsExpression, GreaterExpression, LessEqualsExpression, LessExpression, ModExpression, MulExpression, NegateExpression, OrExpression, PowExpression, SubExpression
         },
         SerializableDataValue, SerializableExpression,
     },
@@ -110,6 +107,7 @@ macro_rules! unary_op {
 fn unary_operator_details(operator: UnaryOp, child: SerializableExpression) -> prost_types::Any {
     match operator {
         UnaryOp::Negate => unary_op!(child, NegateExpression),
+        UnaryOp::Absolute => unary_op!(child, AbsExpression),
     }
     .unwrap()
 }
@@ -132,6 +130,8 @@ fn binary_operator_details(
         // Logical
         BinaryOp::And => binary_op!(lhs, rhs, AndExpression),
         BinaryOp::Or => binary_op!(lhs, rhs, OrExpression),
+
+        // Relational
         BinaryOp::Equals => binary_op!(lhs, rhs, EqualsExpression),
         BinaryOp::Greater => binary_op!(lhs, rhs, GreaterExpression),
         BinaryOp::GreaterEquals => binary_op!(lhs, rhs, GreaterEqualsExpression),
@@ -143,6 +143,8 @@ fn binary_operator_details(
         BinaryOp::Sub => binary_op!(lhs, rhs, SubExpression),
         BinaryOp::Multiply => binary_op!(lhs, rhs, MulExpression),
         BinaryOp::Divide => binary_op!(lhs, rhs, DivExpression),
+        BinaryOp::Remainder => binary_op!(lhs, rhs, ModExpression),
+        BinaryOp::Power => binary_op!(lhs, rhs, PowExpression),
     }
     .unwrap()
 }

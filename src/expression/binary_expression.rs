@@ -1,3 +1,5 @@
+use std::fmt::Binary;
+
 use nes_types::NesType;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -34,6 +36,8 @@ pub enum BinaryOp {
     Sub,
     Multiply,
     Divide,
+    Remainder,
+    Power,
 }
 
 pub enum BinaryOpType {
@@ -53,6 +57,21 @@ impl BinaryOp {
             | Self::Less
             | Self::LessEquals => true,
             _ => false,
+        }
+    }
+
+    pub const fn get_op_type(&self) -> BinaryOpType {
+        match self {
+            Self::And | Self::Or => BinaryOpType::Logical,
+            Self::Equals | Self::Greater | Self::GreaterEquals | Self::Less | Self::LessEquals => {
+                BinaryOpType::Relational
+            }
+            Self::Add
+            | Self::Sub
+            | Self::Multiply
+            | Self::Divide
+            | Self::Remainder
+            | Self::Power => BinaryOpType::Arithmetic,
         }
     }
 }

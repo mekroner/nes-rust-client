@@ -198,6 +198,7 @@ fn stringify_field_expr(field: &Field) -> String {
 fn stringify_unary_expr(expr: &UnaryExpr) -> String {
     let op = match expr.operator {
         UnaryOp::Negate => "!",
+        UnaryOp::Absolute => "abs",
     };
     format!("{op}({})", stringify_expr(&expr.expr))
 }
@@ -206,15 +207,19 @@ fn stringify_binary_expr(expr: &BinaryExpr) -> String {
     let op = match expr.operator {
         BinaryOp::And => "&&",
         BinaryOp::Or => "||",
+
         BinaryOp::Equals => "==",
         BinaryOp::Greater => ">",
         BinaryOp::GreaterEquals => ">=",
         BinaryOp::Less => "<",
         BinaryOp::LessEquals => "<=",
+
         BinaryOp::Add => "+",
         BinaryOp::Sub => "-",
         BinaryOp::Multiply => "*",
         BinaryOp::Divide => "/",
+        BinaryOp::Remainder => "%",
+        BinaryOp::Power => "^"
     };
     format!(
         "({} {op} {})",

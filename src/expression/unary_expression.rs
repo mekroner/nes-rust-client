@@ -1,5 +1,6 @@
 use nes_types::NesType;
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIter;
 
 use super::expression::RawExpr;
 
@@ -16,15 +17,17 @@ impl UnaryExpr {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Serialize, Deserialize)]
 pub enum UnaryOp {
     Negate,
+    Absolute,
 }
 
 impl UnaryOp {
     pub const fn is_logical(&self) -> bool {
         match self {
             UnaryOp::Negate => true,
+            UnaryOp::Absolute => false,
         }
     }
 }
