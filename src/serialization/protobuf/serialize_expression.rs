@@ -4,7 +4,11 @@ use super::{
     nes::{
         serializable_data_value::BasicValue,
         serializable_expression::{
-            AbsExpression, AddExpression, AndExpression, ConstantValueExpression, DivExpression, EqualsExpression, FieldAccessExpression, FieldAssignmentExpression, GreaterEqualsExpression, GreaterExpression, LessEqualsExpression, LessExpression, ModExpression, MulExpression, NegateExpression, OrExpression, PowExpression, SubExpression
+            AbsExpression, AddExpression, AndExpression, ConstantValueExpression, DivExpression,
+            EqualsExpression, FieldAccessExpression, FieldAssignmentExpression,
+            FieldRenameExpression, GreaterEqualsExpression, GreaterExpression,
+            LessEqualsExpression, LessExpression, ModExpression, MulExpression, NegateExpression,
+            OrExpression, PowExpression, SubExpression,
         },
         SerializableDataValue, SerializableExpression,
     },
@@ -89,6 +93,16 @@ fn field_assignment_details(field: &Field, raw_expr: &RawExpr) -> prost_types::A
 }
 
 fn field_details(field: &Field) -> prost_types::Any {
+    // If this field expression has a projected name, we need to create a FieldRenameExpression and wrap the
+    // original field in it.
+    if let Some(pr_name) = field.projected_name() {
+        let inner_field = serialize_field(&Field::typed(field.name(), field.data_type()));
+        let rename_expr = FieldRenameExpression {
+            new_field_name: pr_name.to_string(),
+            original_field_access_expression: Some(inner_field),
+        };
+        return Any::from_msg(&rename_expr).unwrap();
+    }
     let expr = FieldAccessExpression {
         field_name: field.name().to_string(),
         r#type: Some(serialize_data_type(field.data_type())),
